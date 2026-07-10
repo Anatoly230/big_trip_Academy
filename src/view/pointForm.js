@@ -159,13 +159,18 @@ function createPointForm() {
 }
 
 export default class PointFormView {
+
   getTemplate() {
     return createPointForm();
   }
+
   getElement() {
-    if (!this.element) { this.element = createElement(this.getTemplate()); }
+    if (!this.element) {
+      this.element = createElement(this.getTemplate());
+    }
     return this.element;
   }
+
   removeElement() {
     this.element = null;
   }
