@@ -1,7 +1,7 @@
 # Проект «Большое путешествие»
 
 * Студент: [Анатолий Китаев](https://up.htmlacademy.ru/ecmascript-individual/2/user/472465).
-* Наставник: `Виктория Никитина`.
+* Наставник: [Виктория Никитина](https://htmlacademy.ru/profile/id1217273).
 
 ---
 
