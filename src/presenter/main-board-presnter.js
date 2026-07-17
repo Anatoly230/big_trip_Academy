@@ -1,9 +1,9 @@
 import { render } from '../render.js';
-import PointView from '../view/point.js';
-import FilterView from '../view/filter.js';
-import ListView from '../view/list.js';
-import PointFormView from '../view/pointForm.js';
-import SortView from '../view/sort.js';
+import PointView from '../view/point-view.js';
+import FilterView from '../view/filter-view.js';
+import ListView from '../view/list-view.js';
+import PointFormView from '../view/point-form-view.js';
+import SortView from '../view/sort-view.js';
 
 
 export default class BoardPresenter {

@@ -1,4 +1,4 @@
-import BoardPresenter from './presenter/boardPresnter.js';
+import BoardPresenter from './presenter/main-board-presnter.js';
 
 const containers = {
   container: document.querySelector('.trip-events'),
