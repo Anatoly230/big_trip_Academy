@@ -1,78 +1,25 @@
 import { allPoints, allOffers } from '../mock/point-mock.js';
-import { cities } from '../mock/destenation-info.js';
-var ex = [
-  {
-    id: 'PNT-xp966kmrp57u2a',
-    basePrice: 905,
-    dateFrom: '2026-07-21T22:40:11.163Z',
-    dateTo: '2026-07-21T23:45:11.163Z',
-    destination: 'DEST-xp966kmrp57u1e',
-    isFavorite: true,
-    offers: [
-      'OFR-xp966kmrp57u25',
-      'OFR-xp966kmrp57u26',
-      'OFR-xp966kmrp57u27',
-      'OFR-xp966kmrp57u28',
-      'OFR-xp966kmrp57u29'
-    ],
-    type: 'Sightseeing'
-  },
-  {
-    id: 'PNT-xp966kmrp57u2d',
-    basePrice: 435,
-    dateFrom: '2026-07-25T05:58:11.163Z',
-    dateTo: '2026-07-25T07:22:11.163Z',
-    destination: 'DEST-xp966kmrp57u16',
-    isFavorite: false,
-    offers: ['OFR-xp966kmrp57u2b', 'OFR-xp966kmrp57u2c'],
-    type: 'Taxi'
-  },
-  {
-    id: 'PNT-xp966kmrp57u2f',
-    basePrice: 415,
-    dateFrom: '2026-07-27T12:33:11.163Z',
-    dateTo: '2026-07-27T13:26:11.163Z',
-    destination: 'DEST-xp966kmrp57u16',
-    isFavorite: false,
-    offers: ['OFR-xp966kmrp57u2e'],
-    type: 'Taxi'
-  },
-  {
-    id: 'PNT-xp966kmrp57u2k',
-    basePrice: 910,
-    dateFrom: '2026-07-30T16:41:11.163Z',
-    dateTo: '2026-07-30T18:28:11.163Z',
-    destination: 'DEST-xp966kmrp57u1c',
-    isFavorite: true,
-    offers: [
-      'OFR-xp966kmrp57u2g',
-      'OFR-xp966kmrp57u2h',
-      'OFR-xp966kmrp57u2i',
-      'OFR-xp966kmrp57u2j'
-    ],
-    type: 'Check-in'
-  },
-  {
-    id: 'PNT-xp966kmrp57u2m',
-    basePrice: 530,
-    dateFrom: '2026-08-01T21:52:11.163Z',
-    dateTo: '2026-08-01T22:22:11.163Z',
-    destination: 'DEST-xp966kmrp57u1g',
-    isFavorite: true,
-    offers: ['OFR-xp966kmrp57u2l'],
-    type: 'Flight'
-  }
-]
-class PointsModel {
+import { cities } from '../mock/destination-info.js';
+import { destinations } from '../mock/destination-mock.js';
+
+export default class PointsModel {
   #allPoints;
   #allOffers;
-  #cities;
-
+  #allCities;
+  #destinations;
+  #fullDataList;
   getPoints() {
     if (!this.#allPoints) {
       this.#allPoints = allPoints;
     }
     return this.#allPoints;
+  }
+
+  getCities() {
+    if (!this.#allCities) {
+      this.#allCities = cities;
+    }
+    return this.#allCities;
   }
 
   getOffers() {
@@ -82,19 +29,62 @@ class PointsModel {
     return this.#allOffers;
   }
 
-  getCities() {
-    if (!this.#cities) {
-      this.#cities = cities;
+  getDestinations() {
+    if (!this.#destinations) {
+      this.#destinations = destinations;
     }
-    return this.#cities;
+    return this.#destinations;
   }
 
-  getTest() {
-    return this.getPoints()
+  getFullDataList() {
+    if (!this.#fullDataList) {
+      this.#datalistInit();
+    }
+    return this.#fullDataList;
   }
 
+  getStartPoint() {
+    return this.getFullDataList()[0];
+  }
+
+  #datalistInit() {
+    let offers;
+    let id;
+    let pointItem;
+
+    function getElementById(el) {
+      return el.id === id;
+    }
+
+    function getOffersCombine(elId) {
+      let element;
+      id = elId;
+      for (const offer of offers) {
+        element = offer.offers.find(getElementById);
+        if (element) {
+          return element;
+        }
+      }
+    }
+
+    function getDestinationById(el) {
+      return el.id === pointItem.destination;
+    }
+
+    function getOffersByType(el) {
+      return el.type === pointItem.type;
+    }
+
+    this.#fullDataList = [];
+    /* определение принадлежности предложений, пунктов назначений к точкам */
+    for (const p of this.getPoints()) {
+      pointItem = p;
+      offers = this.getOffers().filter(getOffersByType); /* определение типа предложений точки*/
+
+      const destination = this.getDestinations().find(getDestinationById); /* определение принадлежности пункта назхначения к точке*/
+      const pointOffers = p.offers.map(getOffersCombine); /* добавление всех предложений относящихся к данной точке*/
+      this.#fullDataList.push(Object.create({ point: p, offers: pointOffers, destination: destination })); /* добавить  укомплектованную точку  в масиив*/
+    }
+    /* определение принадлежности предложений, пунктов назначений к точкам */
+  }
 }
-
-var points = new PointsModel();
-
-

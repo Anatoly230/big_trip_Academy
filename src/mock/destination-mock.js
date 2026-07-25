@@ -1,10 +1,11 @@
 import { getRandomNum, getRandomFromArray, getId } from '../utils.js';
-import { cities, cityDescriptions, imageDescriptions } from './destenation-info.js';
+import { cities, cityDescriptions, imageDescriptions } from './destination-info.js';
 
 const PREFIX = 'DEST';
 const DESTCOUNT = cities.length;
+const IMAGEPATH = 'https://loremflickr.com/248/152?random=';
 
-class DestanationData {
+class DestinationData {
   constructor() {
     this.cities = cities;
     this.descriptions = cityDescriptions;
@@ -12,7 +13,7 @@ class DestanationData {
   }
 
   getRandomImage() {
-    return `https://loremflickr.com/248/152?random=${getRandomNum()}`;
+    return `${IMAGEPATH}${getRandomNum()}`;
   }
 
   getId() {
@@ -31,26 +32,23 @@ class DestanationData {
       from({ length: this.getRandomNum() }, this.getCityInfo.bind(this));
   }
 
-  getCityDesription() {
-    return getRandomFromArray(this.descriptions);
-  }
-
   getRandomNum() {
     return getRandomNum(1, 5);
   }
 
-  getDestenation() {
+  getDestination() {
+    const cityNum = getRandomNum(cities.length - 1);
     return {
-      name: getRandomFromArray(this.cities),
+      name: this.cities[cityNum],
       id: this.getId(),
-      description: this.getCityDesription(),
+      description: this.descriptions[cityNum],
       pictures: this.getCityInfoArray()
     };
   }
 }
 
-export const destenations = (function getDestenations() {
-  const destCombain = new DestanationData();
+export const destinations = (function getDestinations() {
+  const destCombain = new DestinationData();
   return Array.
-    from({ length: DESTCOUNT }, destCombain.getDestenation.bind(destCombain));
+    from({ length: DESTCOUNT }, destCombain.getDestination.bind(destCombain));
 }());

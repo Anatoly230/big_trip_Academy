@@ -1,6 +1,6 @@
 import { getRandomFromArray, getId, getRandomPrice, getRandomNum } from '../utils.js';
 import { offerDataCombine } from './offer-mock.js';
-import { destenations } from './destenation-mock.js';
+import { destinations } from './destination-mock.js';
 
 
 const PRFIX = 'PNT';
@@ -28,45 +28,35 @@ const timeEnlarger = (function getTimeEnlarger() {
 }());
 
 class PointMock {
-  #pointOffers = offerDataCombine();
-  constructor() {
+  constructor(offersList) {
     this.id = getId(PRFIX);
     this.basePrice = getRandomPrice();
     this.dateFrom = timeEnlarger(10, 30).toJSON();
     this.dateTo = timeEnlarger().toJSON();
-    this.destination = getRandomFromArray(destenations)['id'];/* айди города из статичных данных */
+    this.destination = getRandomFromArray(destinations)['id'];/* айди города из статичных данных */
     this.isFavorite = getRandomNum() % 2 === 1; /* выбрано как 'лучшее' */
-    this.offers = this.#pointOffers.offers.map(getOfersId);
-    this.type = this.#pointOffers.type;
+    this.offers = offersList.offers.map(getOfersId);
+    this.type = offersList.type;
   }
-
-  getOffers() {
-    return this.#pointOffers;
-  }
-
 }
 
 const pointsGen = (function pointsGenerate(count = pointsCount) {
-  let allOffers = [];
-
-  function copyToArray(el) {
-    allOffers.push(el);
-  }
+  let offersList = [];
 
   return function getPoint(check) {
     const points = [];
 
     if (check === 'all') { /*при вызове функции с параметром 'all', она отдаст весь список сгенерированных офферов*/
-      return allOffers;
+      return offersList;
     }
     if (check === 'clear') { /*при вызове функции с параметром 'clear', хачищается массив от старфх оферов*/
-      allOffers = [];
+      offersList = [];
     }
     for (let i = 0; i < count; i++) {
-      const newPoint = new PointMock(); /*создание объекта новой точки*/
+      const offers = offerDataCombine();
+      const newPoint = new PointMock(offers); /*создание объекта новой точки*/
       points.push(newPoint); /*размещение точки в массив сгенерированных точек*/
-      allOffers.push(newPoint.getOffers()); /*на протяжении отработки функции, все точки попадают в массив allOffers*/
-      // newPoint.getOffers().forEach(copyToArray); /*на протяжении отработки функции, все точки попадают в массив allOffers*/
+      offersList.push(offers); /*на протяжении отработки функции, все точки попадают в массив allOffers*/
     }
     return points;
   };

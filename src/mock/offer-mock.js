@@ -14,19 +14,19 @@ export const offerDataCombine = (function offerDataGenerate() {
     return el;
   }
   function getOfferTemlate() {
-    typeOption = cutRandomFromArray(typeItems);/*забираю из массива элемент, чтобы следующий выдор не повторился*/
+    typeOption = cutRandomFromArray(typeItems);/*забираю из массива элемент, чтобы следующий выбор не повторился*/
     return {
       id: getId(PREFIX),
       option: typeOption[optionName],
       title: typeOption[optionTitle],
-      price: getRandomPrice(),
+      price: getRandomPrice(300),
     };
   }
 
   return function getOffers() {
     type = getRandomFromArray(offerTypes); /*определение случайного типа поездки*/
     typeItems = offers[type].map(copyItems); /*копирование массива опций согласно получившемуся типу. Этот массив будет уменьшаться чтобы не повторился следующий выбор*/
-    optionCount = getRandomNum(typeItems.length - 1, 1); /*определяем количество элементов для опций, но чтобы число  небыло больше количества опций*/
+    optionCount = getRandomNum(typeItems.length - 1, 0); /*определяем количество элементов для опций, но чтобы число  небыло больше количества опций*/
     return {
       type: type,
       offers: Array
