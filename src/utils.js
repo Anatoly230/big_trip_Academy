@@ -25,7 +25,10 @@ function getRandomFromArray(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 
 }
-
+/**
+ *@param {[]} arr - массив
+ *@returns {*} - возвращаёте случайный элемент из массива, удалив этот элемент и массива исходника
+ */
 function cutRandomFromArray(arr) {
   return arr.splice(getRandomNum(arr.length - 1), 1)[0];
 }

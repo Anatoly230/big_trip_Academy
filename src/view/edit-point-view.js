@@ -1,20 +1,21 @@
-import { createElement } from '../render.js';
+import AbstractView from '../framework/view/abstract-view.js';
 import { getPointDate } from '../utils.js';
 
-function createOfferButtonTemplate({ option, price, id }) {
 
-  return `<div class="event__available-offers">
-  <div class="event__offer-selector">
-    <input class="event__offer-checkbox  visually-hidden" id="${id}" type="checkbox" name="event-offer-luggage" checked="">
-      <label class="event__offer-label" for="${id}">
-        <span class="event__offer-title">${option}</span>
-        +€&nbsp;
-        <span class="event__offer-price">${price}</span>
-      </label>
-  </div>`;
-}
+function createPointForm(point, destination, offers, cities, possibleOffers) {
 
-function createPointForm(point, destination, offers, cities) {
+  function createOfferButtonTemplate({ option, price, id },) {
+    return `<div class="event__available-offers">
+    <div class="event__offer-selector">
+      <input class="event__offer-checkbox  visually-hidden" id="${id}" type="checkbox" name="event-offer-luggage"
+      ${offers.some(function isHasId(el) { return el.id === id; }) ? 'checked' : ''}>
+        <label class="event__offer-label" for="${id}">
+          <span class="event__offer-title">${option}</span>
+          +€&nbsp;
+          <span class="event__offer-price">${price}</span>
+        </label>
+    </div>`;
+  }
   const startDate = getPointDate(point.dateFrom);
   const endDate = getPointDate(point.dateTo);
   return `
@@ -118,7 +119,7 @@ ${cities.map(function getCities(c) { return `<option value="${c}">${c}</option>`
         <section class="event__section  event__section--offers">
           <h3 class="event__section-title  event__section-title--offers">Offers</h3>
           <div class="event__available-offers">
-          ${offers.map(createOfferButtonTemplate).join('')}
+          ${possibleOffers.map(createOfferButtonTemplate).join('')}
 </div>
         </section >
 
@@ -136,27 +137,63 @@ ${cities.map(function getCities(c) { return `<option value="${c}">${c}</option>`
   `;
 }
 
-export default class EditPointView {
-
-  constructor({ point, destination, offers }, cities) {
+export default class EditPointView extends AbstractView {
+  #onRollupClickHandler = null;
+  #onEscapetHandler = null;
+  #onSubmitHandler = null;
+  constructor({ point, destination, offers, possibleOffers }, cities) {
+    super();
     this.point = point;
     this.destination = destination;
     this.offers = offers;
+    this.possibleOffers = possibleOffers;
     this.allCities = cities;
   }
 
-  getTemplate() {
-    return createPointForm(this.point, this.destination, this.offers, this.allCities);
+  get template() {
+    return createPointForm(this.point, this.destination, this.offers, this.allCities, this.possibleOffers);
   }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
+
+  #getRollupButton() {
+    return this.element.querySelector('.event__rollup-btn');
+  }
+
+  #getSaveButton() {
+    return this.element.querySelector('.event__save-btn');
+  }
+
+  setOnSubmitHandler(handler) {
+    this.#onSubmitHandler = handler;
+    this.#getSaveButton().addEventListener('click', this.#submitHandler.bind(this));
+  }
+
+  setOnRollupClickHandler(handler) {
+    this.#onRollupClickHandler = handler;
+    this.#getRollupButton().addEventListener('click', this.#rollupCklickHandler.bind(this));
+  }
+
+  setOnEscapetHandler(handler) {
+    this.#onEscapetHandler = handler;
+    console.log(this.element)
+    this.element.addEventListener('keydown', this.#escapetHandler.bind(this));
+  }
+
+  #escapetHandler(evt) {
+    if (evt.key === 'Escape' || evt.key === 'Esc') {
+      console.log('esc')
+      evt.preventDefault();
+      this.#onEscapetHandler();
     }
-    return this.element;
+  }
+  #rollupCklickHandler(evt) {
+    evt.preventDefault();
+    this.#onRollupClickHandler();
   }
 
-  removeElement() {
-    this.element = null;
+  #submitHandler(evt) {
+    evt.preventDefault();
+    this.#onSubmitHandler();
   }
+
 }

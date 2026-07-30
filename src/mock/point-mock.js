@@ -28,7 +28,7 @@ const timeEnlarger = (function getTimeEnlarger() {
 }());
 
 class PointMock {
-  constructor(offersList) {
+  constructor(offersList, allOffersList) {
     this.id = getId(PRFIX);
     this.basePrice = getRandomPrice();
     this.dateFrom = timeEnlarger(10, 30).toJSON();
@@ -36,27 +36,39 @@ class PointMock {
     this.destination = getRandomFromArray(destinations)['id'];/* айди города из статичных данных */
     this.isFavorite = getRandomNum() % 2 === 1; /* выбрано как 'лучшее' */
     this.offers = offersList.offers.map(getOfersId);
+    this.allOffers = allOffersList;
     this.type = offersList.type;
   }
 }
 
 const pointsGen = (function pointsGenerate(count = pointsCount) {
-  let offersList = [];
+  let allOffersList = [];
+
+  function getRandomEl() {
+    return getRandomNum() % 2 === 0;
+  }
+
+  function getSelectedOffers(offers) {
+    return {
+      type: offers.type,
+      offers: offers.offers.filter(getRandomEl),
+    };
+  }
 
   return function getPoint(check) {
     const points = [];
 
     if (check === 'all') { /*при вызове функции с параметром 'all', она отдаст весь список сгенерированных офферов*/
-      return offersList;
+      return allOffersList;
     }
     if (check === 'clear') { /*при вызове функции с параметром 'clear', хачищается массив от старфх оферов*/
-      offersList = [];
+      allOffersList = [];
     }
     for (let i = 0; i < count; i++) {
-      const offers = offerDataCombine();
-      const newPoint = new PointMock(offers); /*создание объекта новой точки*/
+      const offersList = offerDataCombine();
+      allOffersList.push(offersList); /*на протяжении отработки функции, все точки попадают в массив allOffers*/
+      const newPoint = new PointMock(getSelectedOffers(offersList), offersList); /*создание объекта новой точки*/
       points.push(newPoint); /*размещение точки в массив сгенерированных точек*/
-      offersList.push(offers); /*на протяжении отработки функции, все точки попадают в массив allOffers*/
     }
     return points;
   };
