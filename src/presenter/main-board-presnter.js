@@ -5,6 +5,7 @@ import ListView from '../view/list-view.js';
 import EditPointView from '../view/edit-point-view.js';
 import SortView from '../view/sort-view.js';
 import PointsModel from '../model/point-model.js';
+import PointPresenter from './point-presenter.js';
 
 
 export default class BoardPresenter {
@@ -28,23 +29,13 @@ export default class BoardPresenter {
 
   }
 
+
   #renderPoints() {
-    for (let i = 0; i < this.pointsData.length - 1; i++) {
-      const editPointView = new EditPointView(this.pointsData[i], this.citiesData);
-      const pointView = new PointView(this.pointsData[i]);
-      pointView.setOnRollupClickHandler(this.#changePointView.bind(this, editPointView, pointView));
-      editPointView.setOnRollupClickHandler(this.#changePointView.bind(this, pointView, editPointView));
-      editPointView.setOnEscapetHandler(this.#changePointView.bind(this, pointView, editPointView));
-      editPointView.setOnSubmitHandler(this.#saveCangesOnSaveButton);
-      render(pointView, this.listComponent.element);
+    const pointPresenter = new PointPresenter(this.listComponent, this.citiesData);
+    for (const point of this.pointsData) {
+      pointPresenter.init(point);
+
     }
   }
 
-  #saveCangesOnSaveButton() {
-    console.log('its save')
-  }
-
-  #changePointView(newPoint, oldPoint) {
-    replace(newPoint, oldPoint);
-  }
 }
