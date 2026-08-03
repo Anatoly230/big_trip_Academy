@@ -1,10 +1,11 @@
-import { render } from '../render.js';
+import { render, replace } from '../framework/render.js';
 import PointView from '../view/point-view.js';
 import FilterView from '../view/filter-view.js';
 import ListView from '../view/list-view.js';
 import EditPointView from '../view/edit-point-view.js';
 import SortView from '../view/sort-view.js';
 import PointsModel from '../model/point-model.js';
+import PointPresenter from './point-presenter.js';
 
 
 export default class BoardPresenter {
@@ -18,17 +19,23 @@ export default class BoardPresenter {
     this.filterContainer = filterContainer;
     this.pointsData = this.pointsModelComponent.getFullDataList();
     this.citiesData = this.pointsModelComponent.getCities();
-    this.startPoint = this.pointsModelComponent.getStartPoint();/*временный элемент*/
   }
 
   init() {
     render(this.filterComponent, this.filterContainer);
     render(this.sortComponent, this.container);
     render(this.listComponent, this.container);
-    render(new EditPointView(this.startPoint, this.citiesData), this.listComponent.getElement());
+    this.#renderPoints();
 
-    for (let i = 1; i < this.pointsData.length - 1; i++) {
-      render(new PointView(this.pointsData[i]), this.listComponent.getElement());
+  }
+
+
+  #renderPoints() {
+    const pointPresenter = new PointPresenter(this.listComponent, this.citiesData);
+    for (const point of this.pointsData) {
+      pointPresenter.init(point);
+
     }
   }
+
 }

@@ -43,9 +43,6 @@ export default class PointsModel {
     return this.#fullDataList;
   }
 
-  getStartPoint() {
-    return this.getFullDataList()[0];
-  }
 
   #datalistInit() {
     let offers;
@@ -83,7 +80,7 @@ export default class PointsModel {
 
       const destination = this.getDestinations().find(getDestinationById); /* определение принадлежности пункта назхначения к точке*/
       const pointOffers = p.offers.map(getOffersCombine); /* добавление всех предложений относящихся к данной точке*/
-      this.#fullDataList.push(Object.create({ point: p, offers: pointOffers, destination: destination })); /* добавить  укомплектованную точку  в масиив*/
+      this.#fullDataList.push(Object.create({ point: p, offers: pointOffers, destination: destination, possibleOffers: p.allOffers.offers })); /* добавить  укомплектованную точку  в масиив*/
     }
     /* определение принадлежности предложений, пунктов назначений к точкам */
   }

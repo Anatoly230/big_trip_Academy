@@ -8,7 +8,6 @@ export const offerDataCombine = (function offerDataGenerate() {
   let type = null;
   let typeItems = null;
   let typeOption = null;
-  let optionCount = null;
 
   function copyItems(el) {
     return el;
@@ -26,11 +25,10 @@ export const offerDataCombine = (function offerDataGenerate() {
   return function getOffers() {
     type = getRandomFromArray(offerTypes); /*определение случайного типа поездки*/
     typeItems = offers[type].map(copyItems); /*копирование массива опций согласно получившемуся типу. Этот массив будет уменьшаться чтобы не повторился следующий выбор*/
-    optionCount = getRandomNum(typeItems.length - 1, 0); /*определяем количество элементов для опций, но чтобы число  небыло больше количества опций*/
     return {
       type: type,
       offers: Array
-        .from({ length: optionCount }, getOfferTemlate),
+        .from({ length: typeItems.length - 1 }, getOfferTemlate),
     };
   };
 }());
