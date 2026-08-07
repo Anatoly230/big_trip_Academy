@@ -1,4 +1,4 @@
-import { getRandomNum, getRandomFromArray, cutRandomFromArray, getId, getRandomPrice } from '../utils.js';
+import { getRandomNum, getRandomFromArray, cutRandomFromArray, getId, getRandomPrice } from '../utils/utils.js';
 import { offers, offerTypes } from './offer-info.js';
 
 export const offerDataCombine = (function offerDataGenerate() {

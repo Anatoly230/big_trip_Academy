@@ -1,4 +1,4 @@
-import { getRandomNum, getRandomFromArray, getId } from '../utils.js';
+import { getRandomNum, getRandomFromArray, getId } from '../utils/utils.js';
 import { cities, cityDescriptions, imageDescriptions } from './destination-info.js';
 
 const PREFIX = 'DEST';

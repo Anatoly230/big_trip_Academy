@@ -1,105 +1,41 @@
-import { render, replace, remove } from '../framework/render.js';
 import EditPointView from '../view/edit-point-view.js';
 import PointView from '../view/point-view.js';
 
-
-class PoinOpenCloseController {
-  #open = null;
-  #close = null;
-
-  #setOpenPoint(open, close) {
-    this.#open = open;
-    this.#close = close;
-  }
-
-  #resetOpenPoint() {
-    this.#open = null;
-    this.#close = null;
-  }
-
-  #isSamePoint({ point }) {
-    return this.#open.point.id === point.id;
-  }
-
-  #fixOpenPoint(open, close) {
-    if (!this.#open && !this.#close) {
-      this.#setOpenPoint(open, close);
-      return true;
-    }
-    return false;
-  }
-
-  getState() {
-    const open = this.#open;
-    const close = this.#close;
-    this.#resetOpenPoint();
-    return { open, close };
-  }
-
-  swap(open, close) {
-    if (this.#fixOpenPoint(open, close)) {
-      replace(open, close);
-      return;
-    }
-    if (this.#isSamePoint(open)) {
-      replace(close, open);
-      this.#resetOpenPoint();
-      return;
-    }
-    replace(this.#close, this.#open);
-    replace(open, close);
-    this.#setOpenPoint(open, close);
-  }
-}
-
-
 export default class PointPresenter {
-  #citiesData = null;
-  #pointsList = null;
-  #pointData = null;
-  #openPoint = null;
-  #allPointsViews = new Set();
-  #pointSwitcher = new PoinOpenCloseController();
+  #pointSwitcher = null;
 
-  constructor(pointsList, citiesData,) {
-    this.#pointsList = pointsList;
-    this.#citiesData = citiesData;
-    document.addEventListener('keydown', this.#onEscapedown.bind(this));
+  constructor(point, citiesData, switcher) {
+    this.#pointSwitcher = switcher;
+    this.pointView = new PointView(point, this.#openClosePoint);
+    this.editPointView = new EditPointView(point, citiesData, this.#openClosePoint, this.#saveEditPoint);
   }
 
-  init(point) {
-    const pointView = new PointView(point, openClosePoint.bind(this));
-    const editPointView = new EditPointView(point, this.#citiesData, openClosePoint.bind(this), saveEditPoint.bind(this));
-    this.#allPointsViews.add([pointView, editPointView]);
+  #openClosePoint = () => {
+    this.#switchListenerForEscapeDown();
+    this.#pointSwitcher.swap(this.editPointView, this.pointView);
+  }
 
-    function saveEditPoint(evt) {
-      evt.preventDefault();
-      console.log('its save');
+  #saveEditPoint = () => {
+    console.log('its save');
+  }
+
+  #switchListenerForEscapeDown() {
+    if (!this.#pointSwitcher.getState().open) {
+      document.addEventListener('keydown', this.#onEscDownHandler);
+    } else {
+      document.removeEventListener('keydown', this.#onEscDownHandler);
     }
-
-    function openClosePoint(evt) {
-      evt.preventDefault();
-      this.#pointSwitcher.swap(editPointView, pointView);
-    }
-
-    render(pointView, this.#pointsList.element);
   }
 
-  getAllPoints() {
-    return this.#allPointsViews;
-  }
 
   #closeLastOpenPoint() {
-    const { open, close } = this.#pointSwitcher.getState();
-    if (open) {
-      replace(close, open);
-    }
+    this.#pointSwitcher.swap();
   }
 
-  #onEscapedown(evt) {
+  #onEscDownHandler = (evt) => {/* вынужденная мера, без стрелки непонятно как удалить обработчик, bind каждый раз создаёт новую функцию, ссылки соответственно разные*/
     if (evt.key === 'Escape' || evt.key === 'Esc') {
       this.#closeLastOpenPoint();
+      document.removeEventListener('keydown', this.#onEscDownHandler);
     }
   }
-
 }
