@@ -1,42 +1,51 @@
 import { allPoints, allOffers } from '../mock/point-mock.js';
+import { offers } from '../mock/offer-info.js';
 import { cities } from '../mock/destination-info.js';
 import { destinations } from '../mock/destination-mock.js';
 
 export default class PointsModel {
   #allPoints;
-  #allOffers;
+  #possibleOffers;
+  #allOffersTypes;
   #allCities;
   #destinations;
   #fullDataList;
-  getPoints() {
+  get points() {
     if (!this.#allPoints) {
       this.#allPoints = allPoints;
     }
     return this.#allPoints;
   }
 
-  getCities() {
+  get cities() {
     if (!this.#allCities) {
       this.#allCities = cities;
     }
     return this.#allCities;
   }
 
-  getOffers() {
-    if (!this.#allOffers) {
-      this.#allOffers = allOffers;
+  get possibleOffers() {
+    if (!this.#possibleOffers) {
+      this.#possibleOffers = allOffers;
     }
-    return this.#allOffers;
+    return this.#possibleOffers;
   }
 
-  getDestinations() {
+  get allOffersTypes() {
+    if (!this.#allOffersTypes) {
+      this.#allOffersTypes = Object.keys(offers);
+    }
+    return this.#allOffersTypes;
+  }
+
+  get destinations() {
     if (!this.#destinations) {
       this.#destinations = destinations;
     }
     return this.#destinations;
   }
 
-  getFullDataList() {
+  get fullDataList() {
     if (!this.#fullDataList) {
       this.#datalistInit();
     }
@@ -45,7 +54,7 @@ export default class PointsModel {
 
 
   #datalistInit() {
-    let offers;
+    let offersByType;
     let id;
     let pointItem;
 
@@ -56,7 +65,7 @@ export default class PointsModel {
     function getOffersCombine(elId) {
       let element;
       id = elId;
-      for (const offer of offers) {
+      for (const offer of offersByType) {
         element = offer.offers.find(getElementById);
         if (element) {
           return element;
@@ -74,13 +83,21 @@ export default class PointsModel {
 
     this.#fullDataList = [];
     /* определение принадлежности предложений, пунктов назначений к точкам */
-    for (const p of this.getPoints()) {
+    for (const p of this.points) {
       pointItem = p;
-      offers = this.getOffers().filter(getOffersByType); /* определение типа предложений точки*/
-
-      const destination = this.getDestinations().find(getDestinationById); /* определение принадлежности пункта назхначения к точке*/
+      offersByType = this.possibleOffers.filter(getOffersByType); /* определение типа предложений точки*/
+      const destination = this.destinations.find(getDestinationById); /* определение принадлежности пункта назхначения к точке*/
       const pointOffers = p.offers.map(getOffersCombine); /* добавление всех предложений относящихся к данной точке*/
-      this.#fullDataList.push(Object.create({ point: p, offers: pointOffers, destination: destination, possibleOffers: p.allOffers.offers })); /* добавить  укомплектованную точку  в масиив*/
+      this.#fullDataList.push(Object
+        .create(
+          {
+            point: p,
+            offers: pointOffers,
+            destination: destination,
+            possibleOffers: p.allOffers.offers,
+            offersTypes: this.allOffersTypes,
+          }
+        )); /* добавить  укомплектованную точку  в масиив*/
     }
     /* определение принадлежности предложений, пунктов назначений к точкам */
   }

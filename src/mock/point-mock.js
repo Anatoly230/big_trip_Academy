@@ -1,4 +1,4 @@
-import { getRandomFromArray, getId, getRandomPrice, getRandomNum } from '../utils.js';
+import { getRandomFromArray, getId, getRandomPrice, getRandomNum } from '../utils/utils.js';
 import { offerDataCombine } from './offer-mock.js';
 import { destinations } from './destination-mock.js';
 
