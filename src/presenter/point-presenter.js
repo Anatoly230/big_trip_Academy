@@ -1,41 +1,34 @@
+import { render, replace } from '../framework/render.js';
 import EditPointView from '../view/edit-point-view.js';
 import PointView from '../view/point-view.js';
 
 export default class PointPresenter {
-  #pointSwitcher = null;
-
-  constructor(point, citiesData, switcher) {
-    this.#pointSwitcher = switcher;
-    this.pointView = new PointView(point, this.#openClosePoint);
-    this.editPointView = new EditPointView(point, citiesData, this.#openClosePoint, this.#saveEditPoint);
+  #pointsContaner = null;
+  constructor({ point, cities, pointsContaner, onOpen, onClose }) {
+    this.onOpen = onOpen;
+    this.onClose = onClose;
+    this.#pointsContaner = pointsContaner;
+    this.pointId = point.point.id;
+    this.pointView = new PointView(point, this.#openPoint.bind(this));
+    this.editPointView = new EditPointView(point, cities, this.closePoint.bind(this), this.#saveEditPoint.bind(this));
   }
 
-  #openClosePoint = () => {
-    this.#switchListenerForEscapeDown();
-    this.#pointSwitcher.swap(this.editPointView, this.pointView);
+  init() {
+    render(this.pointView, this.#pointsContaner.element);
   }
 
-  #saveEditPoint = () => {
+  #openPoint(){
+    this.onOpen(this.pointId);
+    replace(this.editPointView, this.pointView);
+  }
+
+  closePoint(){
+    this.onClose();
+    replace(this.pointView, this.editPointView);
+  }
+
+  #saveEditPoint(){
     console.log('its save');
   }
 
-  #switchListenerForEscapeDown() {
-    if (!this.#pointSwitcher.getState().open) {
-      document.addEventListener('keydown', this.#onEscDownHandler);
-    } else {
-      document.removeEventListener('keydown', this.#onEscDownHandler);
-    }
-  }
-
-
-  #closeLastOpenPoint() {
-    this.#pointSwitcher.swap();
-  }
-
-  #onEscDownHandler = (evt) => {/* вынужденная мера, без стрелки непонятно как удалить обработчик, bind каждый раз создаёт новую функцию, ссылки соответственно разные*/
-    if (evt.key === 'Escape' || evt.key === 'Esc') {
-      this.#closeLastOpenPoint();
-      document.removeEventListener('keydown', this.#onEscDownHandler);
-    }
-  }
 }
