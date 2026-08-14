@@ -124,7 +124,13 @@ export default class EditPointView extends AbstractView {
   #onRollupClick = null;
   #onSubmit = null;
   #submitButton = null;
-  constructor({ point, destination, offers, possibleOffers, offersTypes }, cities, onRollUpClick, onSubmit) {
+
+  constructor(
+    { point, destination, offers, possibleOffers, offersTypes },
+    cities,
+    onRollUpClick,
+    onSubmit,
+  ) {
     super();
     this.#onRollupClick = onRollUpClick;
     this.#onSubmit = onSubmit;

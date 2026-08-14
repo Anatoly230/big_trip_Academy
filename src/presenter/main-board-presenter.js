@@ -18,10 +18,15 @@ export default class BoardPresenter {
   constructor({ container, filterContainer }) {
     this.container = container;
     this.filterContainer = filterContainer;
-    this.possibleOffers = this.pointsModel.possibleOffers;
+    this.possibleOffers = [...this.pointsModel.possibleOffers];
     this.pointsData = this.pointsModel.fullDataList;
     this.citiesData = this.pointsModel.cities;
-    this.pointsList = new PointsListPresenter(this.listComponent, this.pointsData, this.citiesData, this.allOffersTypes);
+    this.pointsList = new PointsListPresenter(
+      this.listComponent,
+      this.pointsData,
+      this.citiesData,
+      this.pointsModel,
+    );
     this.filterComponent = new FilterView(Object.keys(EMPTY_MASSAGE));
   }
 
@@ -33,11 +38,7 @@ export default class BoardPresenter {
   }
 
   #renderFilter() {
-    // if (this.pointsData.length === 0) {
-    //   return;
-    // }
     render(this.filterComponent, this.filterContainer);
-
   }
 
   #renderPoints() {

@@ -2,7 +2,6 @@ import AbstractView from '../framework/view/abstract-view.js';
 import { getPointDate } from '../utils/utils.js';
 
 function createPointTemplate(point, destination, offers) {
-
   function getOffersItem(offer) {
     return `
           <li class="event__offer">
@@ -57,24 +56,31 @@ function createPointTemplate(point, destination, offers) {
 
 export default class PointView extends AbstractView {
   #onRollupClick = null;
-  constructor({ point, destination, offers }, onRollUpClick) {
+  #onFavorite = null;
+  #favoriteButton = null;
+  constructor({ point, destination, offers }, onRollUpClick, onFavoriteClick) {
     super();
+    this.#onFavorite = onFavoriteClick;
     this.point = point;
     this.destination = destination;
     this.offers = offers;
     this.#onRollupClick = onRollUpClick;
-    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#onRollupClickHandler);
+    this.#favoriteButton = this.element.querySelector('.event__favorite-btn');
+    this.#favoriteButton.addEventListener('click', this.#onFavoriteClickHandler.bind(this));
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#onRollupClickHandler.bind(this));
   }
 
   get template() {
     return createPointTemplate(this.point, this.destination, this.offers, this.allCities);
   }
 
-  #onRollupClickHandler = (evt) => {
+  #onRollupClickHandler(evt) {
     evt.preventDefault();
     this.#onRollupClick();
   }
+
+  #onFavoriteClickHandler(evt){
+    evt.preventDefault();
+    this.#onFavorite();
+  }
 }
-
-
-

@@ -7,12 +7,14 @@ export default class PointsListPresenter {
   #citiesData = null;
   #allPointPresenters = new Map();
   #openedPoint = null;
+  #pointsModel = null;
 
 
-  constructor(listComponent, pointsData, citiesData) {
+  constructor(listComponent, pointsData, citiesData, pointsModel) {
     this.#listComponent = listComponent;
     this.#pointsData = pointsData;
     this.#citiesData = citiesData;
+    this.#pointsModel = pointsModel;
   }
 
   init() {
@@ -23,13 +25,14 @@ export default class PointsListPresenter {
         pointsContaner: this.#listComponent,
         onOpen: this.#onOpenPoint.bind(this),
         onClose: this.#onClosePoint.bind(this),
+        pointsModel: this.#pointsModel,
       });
       pointPresenter.init();
       this.#allPointPresenters.set(pointData.point.id, pointPresenter);
     }
   }
 
-  #onOpenPoint(id){
+  #onOpenPoint(id) {
     if (!this.#openedPoint) {
       this.#openedPoint = id;
     } else {
@@ -39,7 +42,7 @@ export default class PointsListPresenter {
     document.addEventListener('keydown', this.#onEscDownHandler);
   }
 
-  #onClosePoint(){
+  #onClosePoint() {
     document.removeEventListener('keydown', this.#onEscDownHandler);
     this.#openedPoint = null;
   }
