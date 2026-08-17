@@ -1,41 +1,58 @@
+import {render, replace } from '../framework/render.js';
 import EditPointView from '../view/edit-point-view.js';
 import PointView from '../view/point-view.js';
 
 export default class PointPresenter {
-  #pointSwitcher = null;
-
-  constructor(point, citiesData, switcher) {
-    this.#pointSwitcher = switcher;
-    this.pointView = new PointView(point, this.#openClosePoint);
-    this.editPointView = new EditPointView(point, citiesData, this.#openClosePoint, this.#saveEditPoint);
+  #pointsContaner = null;
+  constructor({ point, cities, pointsContaner, onOpen, onClose, pointsModel }) {
+    this.pointsModel = pointsModel;
+    this.point = point;
+    this.cities = cities;
+    this.onOpenPoint = onOpen;
+    this.onClosePoint = onClose;
+    this.#pointsContaner = pointsContaner;
+    this.pointId = point.point.id;
   }
 
-  #openClosePoint = () => {
-    this.#switchListenerForEscapeDown();
-    this.#pointSwitcher.swap(this.editPointView, this.pointView);
+  createPoint(point) {
+    this.point = point;
+    this.pointView = new PointView(
+      this.point,
+      this.#openPoint.bind(this),
+      this.#onFavorite.bind(this),
+    );
+    this.editPointView = new EditPointView(
+      this.point,
+      this.cities,
+      this.closePoint.bind(this),
+      this.#saveEditPoint.bind(this),
+    );
   }
 
-  #saveEditPoint = () => {
+  init() {
+    this.createPoint(this.point);
+    render(this.pointView, this.#pointsContaner.element);
+  }
+
+  #openPoint() {
+    this.onOpenPoint(this.pointId);
+    replace(this.editPointView, this.pointView);
+  }
+
+  closePoint() {
+    this.onClosePoint();
+    replace(this.pointView, this.editPointView);
+  }
+
+  #saveEditPoint() {
     console.log('its save');
   }
 
-  #switchListenerForEscapeDown() {
-    if (!this.#pointSwitcher.getState().open) {
-      document.addEventListener('keydown', this.#onEscDownHandler);
-    } else {
-      document.removeEventListener('keydown', this.#onEscDownHandler);
-    }
+  #onFavorite() {
+    const updatedPoint = this.pointsModel.updateFavorite(this.pointId);
+    const oldPointView = this.pointView;
+    this.createPoint(updatedPoint);
+    replace(this.pointView,oldPointView);
   }
 
-
-  #closeLastOpenPoint() {
-    this.#pointSwitcher.swap();
-  }
-
-  #onEscDownHandler = (evt) => {/* вынужденная мера, без стрелки непонятно как удалить обработчик, bind каждый раз создаёт новую функцию, ссылки соответственно разные*/
-    if (evt.key === 'Escape' || evt.key === 'Esc') {
-      this.#closeLastOpenPoint();
-      document.removeEventListener('keydown', this.#onEscDownHandler);
-    }
-  }
 }

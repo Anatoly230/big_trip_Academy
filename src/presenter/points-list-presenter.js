@@ -1,84 +1,60 @@
 import PointPresenter from './point-presenter.js';
-import { render, replace } from '../framework/render.js';
-
-class PointSwitcher {
-  #open = null;
-  #close = null;
-
-  #setOpenPoint(open, close) {
-    this.#open = open;
-    this.#close = close;
-  }
-
-  #resetOpenPoint() {
-    this.#open = null;
-    this.#close = null;
-  }
-
-  #isSamePoint({ point }) {
-    return this.#open.point.id === point.id;
-  }
-
-  #fixOpenPoint(open, close) {
-    if (!this.#open && !this.#close) {
-      this.#setOpenPoint(open, close);
-      return true;
-    }
-    return false;
-  }
-
-  getState() {
-    const open = this.#open;
-    const close = this.#close;
-    return { open, close };
-  }
-
-  swap(open, close) {
-    if (!open && !close) {
-      replace(this.#close, this.#open);
-      this.#resetOpenPoint();
-      return;
-    }
-    if (this.#fixOpenPoint(open, close)) {
-      replace(open, close);
-      return;
-    }
-    if (this.#isSamePoint(open)) {
-      replace(close, open);
-      this.#resetOpenPoint();
-      return;
-    }
-    replace(this.#close, this.#open);
-    replace(open, close);
-    this.#setOpenPoint(open, close);
-  }
-}
 
 export default class PointsListPresenter {
   #listComponent = null;
   #pointsData = null;
   #pointGenerator = null;
   #citiesData = null;
-  #pointSwitcher = new PointSwitcher();
-  #allPointsViews = new Map();
+  #allPointPresenters = new Map();
+  #openedPoint = null;
+  #pointsModel = null;
 
 
-  constructor(listComponent, pointsData, citiesData) {
+  constructor(listComponent, pointsData, citiesData, pointsModel) {
     this.#listComponent = listComponent;
     this.#pointsData = pointsData;
     this.#citiesData = citiesData;
+    this.#pointsModel = pointsModel;
   }
 
   init() {
     for (const pointData of this.#pointsData) {
-      const { pointView, editPointView } = new PointPresenter(pointData, this.#citiesData, this.#pointSwitcher);
-      this.#allPointsViews.set(pointView, editPointView);
-      render(pointView, this.#listComponent.element);
+      const pointPresenter = new PointPresenter({
+        point: pointData,
+        cities: this.#citiesData,
+        pointsContaner: this.#listComponent,
+        onOpen: this.#onOpenPoint.bind(this),
+        onClose: this.#onClosePoint.bind(this),
+        pointsModel: this.#pointsModel,
+      });
+      pointPresenter.init();
+      this.#allPointPresenters.set(pointData.point.id, pointPresenter);
     }
   }
 
-  getAllPoints() {
-    return this.#allPointsViews;
+  #onOpenPoint(id) {
+    if (!this.#openedPoint) {
+      this.#openedPoint = id;
+    } else {
+      this.#allPointPresenters.get(this.#openedPoint).closePoint();
+      this.#openedPoint = id;
+    }
+    document.addEventListener('keydown', this.#onEscDownHandler);
+  }
+
+  #onClosePoint() {
+    document.removeEventListener('keydown', this.#onEscDownHandler);
+    this.#openedPoint = null;
+  }
+
+  #onEscDownHandler = () => {
+    if (this.#openedPoint) {
+      this.#allPointPresenters.get(this.#openedPoint).closePoint();
+    }
+  };
+
+  #getAllPoints() {
+    return this.#allPointPresenters;
   }
 
 }

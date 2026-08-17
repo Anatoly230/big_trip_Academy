@@ -9,7 +9,6 @@ function createEditPointForm({ point, destination, offers, cities, possibleOffer
 
   function createOfferButtonTemplate({ option, price, id },) {
     return `
-         <div class="event__available-offers">
            <div class="event__offer-selector">
              <input class="event__offer-checkbox  visually-hidden" id="${id}" type="checkbox" name="event-offer-luggage"
                ${offers.some(function isHasId(el) { return el.id === id; }) ? 'checked' : ''}>
@@ -125,7 +124,13 @@ export default class EditPointView extends AbstractView {
   #onRollupClick = null;
   #onSubmit = null;
   #submitButton = null;
-  constructor({ point, destination, offers, possibleOffers, offersTypes }, cities, onRollUpClick, onSubmit) {
+
+  constructor(
+    { point, destination, offers, possibleOffers, offersTypes },
+    cities,
+    onRollUpClick,
+    onSubmit,
+  ) {
     super();
     this.#onRollupClick = onRollUpClick;
     this.#onSubmit = onSubmit;

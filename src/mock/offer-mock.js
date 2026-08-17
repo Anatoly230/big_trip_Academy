@@ -1,11 +1,10 @@
-import { getRandomNum, getRandomFromArray, cutRandomFromArray, getId, getRandomPrice } from '../utils/utils.js';
+import { cutRandomFromArray, getId, getRandomPrice } from '../utils/utils.js';
 import { offers, offerTypes } from './offer-info.js';
 
-export const offerDataCombine = (function offerDataGenerate() {
+export const allOffers = (function offerDataGenerate() {
   const PREFIX = 'OFR';
   const optionName = 0;
   const optionTitle = 1;
-  let type = null;
   let typeItems = null;
   let typeOption = null;
 
@@ -22,13 +21,16 @@ export const offerDataCombine = (function offerDataGenerate() {
     };
   }
 
-  return function getOffers() {
-    type = getRandomFromArray(offerTypes); /*определение случайного типа поездки*/
+  function getOffers(type) {
     typeItems = offers[type].map(copyItems); /*копирование массива опций согласно получившемуся типу. Этот массив будет уменьшаться чтобы не повторился следующий выбор*/
     return {
       type: type,
       offers: Array
         .from({ length: typeItems.length - 1 }, getOfferTemlate),
     };
-  };
+  }
+
+  return offerTypes.map(getOffers);
+
 }());
+

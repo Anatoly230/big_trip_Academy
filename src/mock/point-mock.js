@@ -1,10 +1,10 @@
 import { getRandomFromArray, getId, getRandomPrice, getRandomNum } from '../utils/utils.js';
-import { offerDataCombine } from './offer-mock.js';
+import { allOffers } from './offer-mock.js';
 import { destinations } from './destination-mock.js';
 
 
 const PRFIX = 'PNT';
-const pointsCount = 5;
+const POINTS_COUNT = 5;
 
 function getOfersId(el) {
   return el.id;
@@ -28,7 +28,7 @@ const timeEnlarger = (function getTimeEnlarger() {
 }());
 
 class PointMock {
-  constructor(offersList, allOffersList) {
+  constructor(offersList) {
     this.id = getId(PRFIX);
     this.basePrice = getRandomPrice();
     this.dateFrom = timeEnlarger(10, 30).toJSON();
@@ -36,14 +36,11 @@ class PointMock {
     this.destination = getRandomFromArray(destinations)['id'];/* айди города из статичных данных */
     this.isFavorite = getRandomNum() % 2 === 1; /* выбрано как 'лучшее' */
     this.offers = offersList.offers.map(getOfersId);
-    this.allOffers = allOffersList;
     this.type = offersList.type;
   }
 }
 
-const pointsGen = (function pointsGenerate(count = pointsCount) {
-  let allOffersList = [];
-
+export const allPoints = (function pointsGenerate() {
   function getRandomEl() {
     return getRandomNum() % 2 === 0;
   }
@@ -55,25 +52,11 @@ const pointsGen = (function pointsGenerate(count = pointsCount) {
     };
   }
 
-  return function getPoint(check) {
-    const points = [];
-
-    if (check === 'all') { /*при вызове функции с параметром 'all', она отдаст весь список сгенерированных офферов*/
-      return allOffersList;
-    }
-    if (check === 'clear') { /*при вызове функции с параметром 'clear', хачищается массив от старфх оферов*/
-      allOffersList = [];
-    }
-    for (let i = 0; i < count; i++) {
-      const offersList = offerDataCombine();
-      allOffersList.push(offersList); /*на протяжении отработки функции, все точки попадают в массив allOffers*/
-      const newPoint = new PointMock(getSelectedOffers(offersList), offersList); /*создание объекта новой точки*/
-      points.push(newPoint); /*размещение точки в массив сгенерированных точек*/
-    }
-    return points;
-  };
-
+  const points = [];
+  for (let i = 0; i < POINTS_COUNT; i++) {
+    const offers = getRandomFromArray(allOffers);
+    const newPoint = new PointMock(getSelectedOffers(offers), offers); /*создание объекта новой точки*/
+    points.push(newPoint); /*размещение точки в массив сгенерированных точек*/
+  }
+  return points;
 }());
-
-export const allPoints = pointsGen();
-export const allOffers = pointsGen('all');

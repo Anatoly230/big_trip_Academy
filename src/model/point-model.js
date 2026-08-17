@@ -1,15 +1,18 @@
-import { allPoints, allOffers } from '../mock/point-mock.js';
-import { offers } from '../mock/offer-info.js';
+import { allPoints } from '../mock/point-mock.js';
+import { allOffers } from '../mock/offer-mock.js';
 import { cities } from '../mock/destination-info.js';
 import { destinations } from '../mock/destination-mock.js';
+
 
 export default class PointsModel {
   #allPoints;
   #possibleOffers;
-  #allOffersTypes;
+  #allOfferTypes;
   #allCities;
   #destinations;
   #fullDataList;
+  #pointIdDictionary;
+
   get points() {
     if (!this.#allPoints) {
       this.#allPoints = allPoints;
@@ -31,11 +34,11 @@ export default class PointsModel {
     return this.#possibleOffers;
   }
 
-  get allOffersTypes() {
-    if (!this.#allOffersTypes) {
-      this.#allOffersTypes = Object.keys(offers);
+  get allOfferTypes() {
+    if (!this.#allOfferTypes) {
+      this.#allOfferTypes = allOffers.map(function getType(el) { return el.type });
     }
-    return this.#allOffersTypes;
+    return this.#allOfferTypes;
   }
 
   get destinations() {
@@ -52,25 +55,25 @@ export default class PointsModel {
     return this.#fullDataList;
   }
 
+  setPointIdDictionary() {
+    this.#pointIdDictionary = {};
+    for (const item of this.#fullDataList) {
+      this.#pointIdDictionary[item.point.id] = item;
+    }
+  }
+
+  updateFavorite = (pointId) => {
+    const updatedPoint = this.#pointIdDictionary[pointId];
+    updatedPoint.point.isFavorite = !updatedPoint.point.isFavorite;
+    return updatedPoint;
+  };
 
   #datalistInit() {
-    let offersByType;
-    let id;
+    let ownOffersMap;
     let pointItem;
 
-    function getElementById(el) {
-      return el.id === id;
-    }
-
-    function getOffersCombine(elId) {
-      let element;
-      id = elId;
-      for (const offer of offersByType) {
-        element = offer.offers.find(getElementById);
-        if (element) {
-          return element;
-        }
-      }
+    function getOffersCombine(id) {
+      return ownOffersMap[id];
     }
 
     function getDestinationById(el) {
@@ -85,20 +88,28 @@ export default class PointsModel {
     /* определение принадлежности предложений, пунктов назначений к точкам */
     for (const p of this.points) {
       pointItem = p;
-      offersByType = this.possibleOffers.filter(getOffersByType); /* определение типа предложений точки*/
+
+      const allOffersByType = this.possibleOffers.filter(getOffersByType)[0].offers; /* определение типа всех возможных предложений точки*/
+      ownOffersMap = allOffersByType.reduce((acc, el) => {
+        acc[el.id] = el;
+        return acc;
+      }, {}); /*создание словаря, чтобы исключить циклы для поиска опций*/
+
+
       const destination = this.destinations.find(getDestinationById); /* определение принадлежности пункта назхначения к точке*/
       const pointOffers = p.offers.map(getOffersCombine); /* добавление всех предложений относящихся к данной точке*/
-      this.#fullDataList.push(Object
-        .create(
-          {
-            point: p,
-            offers: pointOffers,
-            destination: destination,
-            possibleOffers: p.allOffers.offers,
-            offersTypes: this.allOffersTypes,
-          }
-        )); /* добавить  укомплектованную точку  в масиив*/
+
+      this.#fullDataList.push(
+        {
+          point: p, /*сама точка*/
+          offers: pointOffers, /*все выбранные предложения в точке*/
+          destination: destination, /*город назнаяения точки*/
+          possibleOffers: allOffersByType, /*все возможные предложения по типу*/
+          offersTypes: this.allOfferTypes, /*список типов предложений*/
+        }
+      ); /* добавить  укомплектованную точку  в масиив*/
     }
     /* определение принадлежности предложений, пунктов назначений к точкам */
+    this.setPointIdDictionary(); /*собрать справочник по  id точки*/
   }
 }
