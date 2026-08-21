@@ -9,7 +9,6 @@ import { EMPTY_MASSAGE } from '../utils/const.js';
 
 
 export default class BoardPresenter {
-  sortComponent = new SortView();
   listComponent = new ListView();
   filterComponent = null;
   pointsModel = new PointsModel();
@@ -27,6 +26,7 @@ export default class BoardPresenter {
       this.citiesData,
       this.pointsModel,
     );
+    this.sortComponent = new SortView(this.pointsList.onSortClick.bind(this.pointsList));
     this.filterComponent = new FilterView(Object.keys(EMPTY_MASSAGE));
   }
 
