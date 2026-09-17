@@ -30,6 +30,15 @@ export default class PointsModel {
     return this.#allPoints;
   }
 
+  updatePoints() {
+
+  }
+
+  updatePoint(id, updateData) {
+this.#pointIdDictionary[id]
+  }
+
+
   get cities() {
     if (!this.#allCities) {
       this.#allCities = cities;
