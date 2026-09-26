@@ -1,53 +1,85 @@
 import { render } from '../framework/render.js';
-import FilterView from '../view/filter-view.js';
-import ListView from '../view/list-view.js';
-import SortView from '../view/sort-view.js';
-import PointsModel from '../model/point-model.js';
 import EmptyListView from '../view/empty-list-veiw.js';
+import ListView from '../view/list-view.js';
 import PointsListPresenter from './points-list-presenter.js';
-import { EMPTY_MASSAGE } from '../utils/const.js';
-
-
+import SortModel from '../model/sort-model.js';
+import SortPresenter from './sort-presenter.js';
+import { FilterType, SortType } from '../const.js';
+import { filters } from '../utils/filters.js';
+import { sortPriceUp, sortTimeUp } from '../utils/sorts.js';
 
 export default class BoardPresenter {
-  listComponent = new ListView();
-  filterComponent = null;
-  pointsModel = new PointsModel();
-  #emptyMessage = null;
+  #boardContainer = null;
+  #listView = new ListView();
+  #sortModel = new SortModel();
+  #pointsModel = null;
+  #filterModel = null;
+  #sortPresenter = null;
+  #filterType = FilterType.EVERETHING;
+  #sortType = SortType.DEFAULT;
+  #noPointsView = null;
 
-  constructor({ container, filterContainer }) {
-    this.container = container;
-    this.filterContainer = filterContainer;
-    this.possibleOffers = [...this.pointsModel.possibleOffers];
-    this.pointsData = this.pointsModel.fullDataList;
-    this.citiesData = this.pointsModel.cities;
-    this.pointsList = new PointsListPresenter(
-      this.listComponent,
-      this.pointsData,
-      this.citiesData,
-      this.pointsModel,
-    );
-    this.sortComponent = new SortView(this.pointsList.onSortClick.bind(this.pointsList));
-    this.filterComponent = new FilterView(this.pointsList.onFilterClick.bind(this.pointsList));
+  constructor({ boardContainer, pointsModel, filterModel }) {
+    this.#boardContainer = boardContainer;
+    this.#pointsModel = pointsModel;
+    this.#filterModel = filterModel;
+    this.possibleOffers = [...this.#pointsModel.possibleOffers];
+    this.pointsData = this.#pointsModel.fullDataList;
+    this.citiesData = this.#pointsModel.cities;
+  }
+
+  get points() {
+    this.#filterType = this.#filterModel.filter;
+    const points = this.#pointsModel.fullDataList;
+    const filtredPoints = filters[this.#filterType](points);
+
+    switch (this.#sortType) {
+      case SortType.PRICE:
+        return filtredPoints.sort(sortPriceUp);
+      case SortType.TIME:
+        return filtredPoints.sort(sortTimeUp);
+    }
+    return filtredPoints;
   }
 
   init() {
-    this.#renderFilter();
-    render(this.sortComponent, this.container);
-    render(this.listComponent, this.container);
-    this.#renderPoints();
+    this.#renderBoard();
   }
 
-  #renderFilter() {
-    render(this.filterComponent, this.filterContainer);
+
+  #renderSort() {
+    this.#sortPresenter = new SortPresenter({ sortModel: this.#sortModel });
+    this.#sortPresenter.init(this.#boardContainer);
+  }
+
+  #renderNoPoints() {
+    this.#noPointsView = new EmptyListView({ filterType: this.#filterType });
+    render(this.#noPointsView, this.#listView.element);
   }
 
   #renderPoints() {
-    if (this.pointsData.length === 0) {
-      render(new EmptyListView(EMPTY_MASSAGE.Everthing), this.listComponent.element);
-      return;
-    }
+    render(this.#listView, this.#boardContainer);
+    this.pointsList = new PointsListPresenter(
+      this.#listView,
+      this.points,
+      this.citiesData,
+      this.#pointsModel,
+    );
     this.pointsList.init();
   }
+
+  #renderBoard() {
+    const points = this.points;
+    if (points.length === 0) {
+      this.#renderNoPoints();
+    }
+    this.#renderSort();
+    this.#renderPoints();
+  }
+
+  #clearBoard() {
+    this.pointsList.removePoints();
+  }
+
 }
 

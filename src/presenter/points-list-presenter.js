@@ -1,20 +1,16 @@
-import { SortType } from '../utils/const.js';
-import { FilterType } from '../utils/const.js';
+import { SortType, FilterType } from '../const.js';
 import PointPresenter from './point-presenter.js';
 
 
 export default class PointsListPresenter {
   #listComponent = null;
   #pointsData = null;
-  #pointGenerator = null;
   #citiesData = null;
   #allPointPresenters = new Map();
   #openedPoint = null;
   #pointsModel = null;
   #currentSortType = null;
   #currentFilterType = null;
-  #sortModel = null;
-
 
   constructor(listComponent, pointsData, citiesData, pointsModel) {
     this.#listComponent = listComponent;
@@ -52,7 +48,7 @@ export default class PointsListPresenter {
     const filtredPoints = this.#pointsModel.getFilteredPoints(filterType);
     this.#pointsModel.resetSortPoints(filtredPoints);
     const sortedPoints = this.#pointsModel.getSortedPoints(this.#currentSortType);
-    this.#removePoints();
+    this.removePoints();
     this.#currentFilterType = filterType;
     this.init(sortedPoints);
   }
@@ -62,14 +58,14 @@ export default class PointsListPresenter {
       return;
     }
     const sortedPoints = this.#pointsModel.getSortedPoints(sortType);
-    this.#removePoints();
+    this.removePoints();
     this.#currentSortType = sortType;
     this.init(sortedPoints);
   }
 
-  #removePoints() {
+  removePoints() {
     this.#allPointPresenters.forEach(this.#removePointViews);
-    this.#allPointPresenters = new Map();
+    this.#allPointPresenters.clear();
   }
 
   #onOpenPoint(id) {

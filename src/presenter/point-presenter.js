@@ -25,7 +25,7 @@ export default class PointPresenter {
     this.editPointView = new EditPointView(
       this.point,
       this.cities,
-      this.#closePoint.bind(this),
+      this.closePoint.bind(this),
       this.#saveEditPoint.bind(this),
       this.#onDestination.bind(this),
       this.#onEventType.bind(this),
@@ -60,7 +60,7 @@ export default class PointPresenter {
     replace(this.editPointView, this.pointView);
   }
 
-  #closePoint() {
+  closePoint() {
     this.#onClosePoint();
     this.#updatePointsViews();
     replace(this.pointView, this.editPointView);

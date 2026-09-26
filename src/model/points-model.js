@@ -1,3 +1,4 @@
+import Observable from '../framework/observable.js';
 import { allPoints } from '../mock/point-mock.js';
 import { allOffers } from '../mock/offer-mock.js';
 import { cities } from '../mock/destination-info.js';
@@ -5,7 +6,7 @@ import { destinations } from '../mock/destination-mock.js';
 import { PointsSortModel } from './points-sort-model.js';
 import { PointsFilterModel } from './points-filter-model.js';
 
-export default class PointsModel {
+export default class PointsModel extends Observable {
   #allPoints = null;
   #possibleOffers = null;
   #allOfferTypes = null;
@@ -19,9 +20,25 @@ export default class PointsModel {
   #filterModel = null;
 
   constructor() {
+    super();
     this.#filterModel = new PointsFilterModel(this.fullDataList);
     this.#sortModel = new PointsSortModel(this.fullDataList);
   }
+
+  updatePoint(updateType, update) {
+    this._notyfy(updateType, update);
+  }
+
+  addPoint(updateType, update) {
+    this._notyfy(updateType, update);
+
+  }
+
+  deletePoint(updateType, update) {
+
+    this._notyfy(updateType, update);
+  }
+
 
   get points() {
     if (!this.#allPoints) {
@@ -29,15 +46,6 @@ export default class PointsModel {
     }
     return this.#allPoints;
   }
-
-  updatePoints() {
-
-  }
-
-  updatePoint(id, updateData) {
-this.#pointIdDictionary[id]
-  }
-
 
   get cities() {
     if (!this.#allCities) {

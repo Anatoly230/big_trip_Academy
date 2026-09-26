@@ -1,5 +1,5 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
-import { getPointDate } from '../utils/utils.js';
+import { getPointDate } from '../utils/common.js';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/themes/material_blue.css';
 

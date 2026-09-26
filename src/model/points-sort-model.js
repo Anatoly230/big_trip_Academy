@@ -1,4 +1,4 @@
-import { SortType } from '../utils/const.js';
+import { SortType } from '../const.js';
 import dayjs from 'dayjs';
 
 export class PointsSortModel {

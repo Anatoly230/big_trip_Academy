@@ -1,7 +1,7 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
-import { getPointDate } from '../utils/utils.js';
+import { getPointDate } from '../utils/common.js';
 
-function createPointTemplate(point, destination, offers, isFavorite) {
+function createPointTemplate(point, destination, offers, {isFavorite}) {
   function getOffersItem(offer) {
     return `
           <li class="event__offer">
@@ -76,7 +76,7 @@ export default class PointView extends AbstractStatefulView {
   }
 
   get template() {
-    return createPointTemplate(this.point, this.destination, this.offers, this._state.isFavorite);
+    return createPointTemplate(this.point, this.destination, this.offers, this._state);
   }
 
   #onRollupClickHandler(evt) {
