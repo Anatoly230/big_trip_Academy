@@ -2,7 +2,7 @@ import { getRandomNum, getRandomFromArray, getId } from '../utils/common.js';
 import { cities, cityDescriptions, imageDescriptions } from './destination-info.js';
 
 const PREFIX = 'DEST';
-const DESTCOUNT = cities.length;
+const DESTCOUNT = cities.length - 1;
 const IMAGEPATH = 'https://loremflickr.com/248/152?random=';
 let cityNum = 0;
 class DestinationData {

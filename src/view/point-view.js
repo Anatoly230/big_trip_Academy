@@ -58,14 +58,15 @@ export default class PointView extends AbstractStatefulView {
   #onRollupClick = null;
   #onFavorite = null;
   #favoriteButton = null;
+
   constructor({ point, destination, offers }, onRollUpClick, onFavoriteClick) {
     super();
     this.#onFavorite = onFavoriteClick;
+    this.#onRollupClick = onRollUpClick;
     this.point = point;
-    this._state = { isFavorite: this.point.isFavorite };
     this.destination = destination;
     this.offers = offers;
-    this.#onRollupClick = onRollUpClick;
+    this._state = { isFavorite: this.point.isFavorite };
     this._restoreHandlers();
   }
 
@@ -86,6 +87,6 @@ export default class PointView extends AbstractStatefulView {
 
   #onFavoriteClickHandler(evt) {
     evt.preventDefault();
-    this.#onFavorite(!this._state.isFavorite);
+    this.#onFavorite();
   }
 }

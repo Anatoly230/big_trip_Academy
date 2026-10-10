@@ -1,31 +1,42 @@
+import { UpdateType, UserAction } from '../const.js';
 import { remove, render, replace } from '../framework/render.js';
 import EditPointView from '../view/edit-point-view.js';
 import PointView from '../view/point-view.js';
 
+const Mode = {
+  DEFAULT: 'DEFAULT',
+  EDITING: 'EDITING',
+};
+
 export default class PointPresenter {
   #pointsContaner = null;
-  #onClosePoint = null;
-  constructor({ point, cities, pointsContaner, onOpen, onClose, pointsModel }) {
-    this.pointsModel = pointsModel;
-    this.point = point;
+  #handleModeChange = null;
+  #handleDataChange = null;
+
+  #pointView = null;
+  #editPointView = null;
+
+  #point = null;
+  #mode = Mode.DEFAULT;
+
+  constructor({ cities, pointsContaner, onModeChange, onDataChange }) {
+    this.#handleModeChange = onModeChange;
+    this.#handleDataChange = onDataChange;
     this.cities = cities;
-    this.onOpenPoint = onOpen;
-    this.#onClosePoint = onClose;
     this.#pointsContaner = pointsContaner;
-    this.pointId = point.point.id;
   }
 
   createPoint(point) {
-    this.point = point;
-    this.pointView = new PointView(
-      this.point,
-      this.#openPoint.bind(this),
-      this.#onFavorite.bind(this),
+    this.#point = point;
+    this.#pointView = new PointView(
+      this.#point,
+      this.#handleEditClick.bind(this),
+      this.#onFavorite.bind(this)
     );
-    this.editPointView = new EditPointView(
-      this.point,
+    this.#editPointView = new EditPointView(
+      this.#point,
       this.cities,
-      this.closePoint.bind(this),
+      this.#handleCloseEditClick.bind(this),
       this.#saveEditPoint.bind(this),
       this.#onDestination.bind(this),
       this.#onEventType.bind(this),
@@ -34,7 +45,7 @@ export default class PointPresenter {
   }
 
   #updatePointsViews() {
-    this.editPointView.updateElement({
+    this.#editPointView.updateElement({
       offers: this.point.offers,
       basePrice: this.point.point.basePrice,
       dateFrom: this.point.point.dateFrom,
@@ -46,38 +57,84 @@ export default class PointPresenter {
   }
 
   removePoint() {
-    remove(this.pointView);
-    remove(this.editPointView);
+    remove(this.#pointView);
+    remove(this.#editPointView);
   }
 
-  init() {
-    this.createPoint(this.point);
-    render(this.pointView, this.#pointsContaner.element);
+  init(point) {
+    this.#point = point;
+
+    const prevPointView = this.#pointView;
+    const prevEditPointView = this.#editPointView;
+
+    this.createPoint(this.#point);
+
+    if (prevPointView === null || prevEditPointView === null) {
+      render(this.#pointView, this.#pointsContaner.element);
+      return;
+    }
+
+    if (this.#mode === Mode.DEFAULT) {
+      replace(this.#pointView, prevPointView);
+    }
+
+    if (this.#mode === Mode.EDITING) {
+      replace(this.#editPointView, prevEditPointView);
+    }
+
+    remove(prevPointView);
+    remove(prevEditPointView);
   }
 
-  #openPoint() {
-    this.onOpenPoint(this.pointId);
-    replace(this.editPointView, this.pointView);
+  resetView() {
+    if (this.#mode !== Mode.DEFAULT) {
+      this.#replaceFormToCard();
+      // this.#editPointView.reset(this.#point);
+    }
   }
 
-  closePoint() {
-    this.#onClosePoint();
-    this.#updatePointsViews();
-    replace(this.pointView, this.editPointView);
+  #replaceCardToForm() {
+    this.#handleModeChange(this.#point.point.id);
+    replace(this.#editPointView, this.#pointView);
+    document.addEventListener('keydown', this.#escKeyDownHandler);
+    this.#mode = Mode.EDITING;
+  }
+
+  #replaceFormToCard() {
+    replace(this.#pointView, this.#editPointView);
+    document.removeEventListener('keydown', this.#escKeyDownHandler);
+    this.#mode = Mode.DEFAULT;
+  }
+
+  #escKeyDownHandler = (evt) => {
+    if (evt.key === 'Escape') {
+      evt.preventDefault();
+      this.#replaceFormToCard();
+    }
+  };
+
+  #handleEditClick() {
+    this.#replaceCardToForm();
+  }
+
+  #handleCloseEditClick() {
+    this.#replaceFormToCard();
   }
 
   #saveEditPoint() {
     console.log('its save');
   }
 
-  #onFavorite(favoriteState) {
-    this.pointsModel.updateFavorite(this.pointId, favoriteState);
-    this.pointView.updateElement({ isFavorite: favoriteState });
+  #onFavorite() {
+    console.log(this.#point)
+  //  this.#handleDataChange(UserAction.UPDATE_POINT, UpdateType.MINOR, {})
+    console.log('Favorite')
+    // this.#pointView.updateElement({ isFavorite: favoriteState });
   }
 
   #onDestination(cityName) {
     const newDestination = this.pointsModel.destinationsByName[cityName];
-    this.editPointView.updateElement({
+    this.#editPointView.updateElement({
       destination: newDestination,
       offers: [],
     });
@@ -85,7 +142,7 @@ export default class PointPresenter {
 
   #onEventType(newType) {
     const newOffersByType = this.pointsModel.offersByType(newType);
-    this.editPointView.updateElement({
+    this.#editPointView.updateElement({
       pointType: newType,
       offers: [],
       possibleOffers: newOffersByType,
@@ -93,7 +150,7 @@ export default class PointPresenter {
   }
 
   #onDateChange(dateChanges) {
-    this.editPointView.updateElement(dateChanges);
+    this.#editPointView.updateElement(dateChanges);
   }
 
 }

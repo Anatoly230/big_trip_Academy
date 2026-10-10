@@ -1,4 +1,4 @@
-import { SortType, FilterType } from '../const.js';
+
 import PointPresenter from './point-presenter.js';
 
 
@@ -7,89 +7,78 @@ export default class PointsListPresenter {
   #pointsData = null;
   #citiesData = null;
   #allPointPresenters = new Map();
-  #openedPoint = null;
+  #editedPoint = null;
   #pointsModel = null;
-  #currentSortType = null;
-  #currentFilterType = null;
+  // #currentSortType = null;
+  // #currentFilterType = null;
 
-  constructor(listComponent, pointsData, citiesData, pointsModel) {
+  constructor({ listComponent, points, cities, pointsModel }) {
     this.#listComponent = listComponent;
-    this.#pointsData = pointsData;
-    this.#citiesData = citiesData;
+    this.#pointsData = points;
+    this.#citiesData = cities;
     this.#pointsModel = pointsModel;
-    this.#currentSortType = SortType.DEFAULT;
-    this.#currentFilterType = FilterType.EVERETHING;
+    // this.#currentSortType = SortType.DEFAULT;
+    // this.#currentFilterType = FilterType.EVERETHING;
   }
 
   init(points = this.#pointsData) {
-
     for (const pointData of points) {
       const pointPresenter = new PointPresenter({
         point: pointData,
         cities: this.#citiesData,
         pointsContaner: this.#listComponent,
-        onOpen: this.#onOpenPoint.bind(this),
-        onClose: this.#onClosePoint.bind(this),
+        onModeChange:this.#hanndleModeChange.bind(this),
         pointsModel: this.#pointsModel,
       });
-      pointPresenter.init();
+      pointPresenter.init(pointData);
       this.#allPointPresenters.set(pointData.point.id, pointPresenter);
     }
+  }
+
+  getPointPresenter(id) {
+    return this.#allPointPresenters.get(id);
   }
 
   #removePointViews(el) {
     el.removePoint();
   }
 
-  onFilterClick(filterType) {
-    if (filterType === this.#currentFilterType) {
-      return;
-    }
-    const filtredPoints = this.#pointsModel.getFilteredPoints(filterType);
-    this.#pointsModel.resetSortPoints(filtredPoints);
-    const sortedPoints = this.#pointsModel.getSortedPoints(this.#currentSortType);
-    this.removePoints();
-    this.#currentFilterType = filterType;
-    this.init(sortedPoints);
-  }
+  // onFilterClick(filterType) {
+  //   if (filterType === this.#currentFilterType) {
+  //     return;
+  //   }
+  //   const filtredPoints = this.#pointsModel.getFilteredPoints(filterType);
+  //   this.#pointsModel.resetSortPoints(filtredPoints);
+  //   const sortedPoints = this.#pointsModel.getSortedPoints(this.#currentSortType);
+  //   this.removePoints();
+  //   this.#currentFilterType = filterType;
+  //   this.init(sortedPoints);
+  // }
 
-  onSortClick(sortType) {
-    if (sortType === this.#currentSortType) {
-      return;
+  // onSortClick(sortType) {
+  //   if (sortType === this.#currentSortType) {
+  //     return;
+  //   }
+  //   const sortedPoints = this.#pointsModel.getSortedPoints(sortType);
+  //   this.removePoints();
+  //   this.#currentSortType = sortType;
+  //   this.init(sortedPoints);
+  // }
+
+  #hanndleModeChange(id) {
+    if (!this.#editedPoint) {
+      this.#editedPoint = id;
     }
-    const sortedPoints = this.#pointsModel.getSortedPoints(sortType);
-    this.removePoints();
-    this.#currentSortType = sortType;
-    this.init(sortedPoints);
+    if (this.#editedPoint !== id) {
+      this.getPointPresenter(this.#editedPoint).resetView();
+      this.#editedPoint = id;
+    }
   }
 
   removePoints() {
     this.#allPointPresenters.forEach(this.#removePointViews);
     this.#allPointPresenters.clear();
   }
-
-  #onOpenPoint(id) {
-    if (!this.#openedPoint) {
-      this.#openedPoint = id;
-    } else {
-      this.#allPointPresenters.get(this.#openedPoint).closePoint();
-      this.#openedPoint = id;
-    }
-    document.addEventListener('keydown', this.#onEscDownHandler);
-  }
-
-  #onClosePoint() {
-    document.removeEventListener('keydown', this.#onEscDownHandler);
-    this.#openedPoint = null;
-  }
-
-  #onEscDownHandler = (evt) => {
-    if (evt.key === 'Escape') {
-      if (this.#openedPoint) {
-        this.#allPointPresenters.get(this.#openedPoint).closePoint();
-      }
-    }
-  };
 
   #getAllPoints() {
     return this.#allPointPresenters;
@@ -158,8 +147,8 @@ var ageObsever = {
 
 var user = new User('Анатолий', 43);
 
-user.subscribe('name',nameObsever);
-user.subscribe('age',ageObsever);
+user.subscribe('name', nameObsever);
+user.subscribe('age', ageObsever);
 
 // user.name = 'Tolya';
 // user.name = 'Tontik';

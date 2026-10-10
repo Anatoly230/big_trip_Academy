@@ -3,6 +3,7 @@ import { getPointDate } from '../utils/common.js';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/themes/material_blue.css';
 
+
 function createEditPointForm({ cities, offersTypes, state }) {
   const startDate = getPointDate(state.dateFrom);
   const endDate = getPointDate(state.dateTo);
@@ -152,6 +153,8 @@ export default class EditPointView extends AbstractStatefulView {
     this.point = point;
     this.allCities = cities;
     this.offersTypes = offersTypes;
+
+    this._stateTest = structuredClone({ ...this.point });
     this._state = {
       offers: offers,
       basePrice: point.basePrice,
@@ -197,7 +200,7 @@ export default class EditPointView extends AbstractStatefulView {
   }
 
   #destrtoyPicker() {
-    this.#calenders.forEach((calendar) => { calendar.destroy() })
+    this.#calenders.forEach((calendar) => { calendar.destroy() });
     this.calendar = null;
   }
 
@@ -259,5 +262,15 @@ export default class EditPointView extends AbstractStatefulView {
         break;
     }
   }
+
+  static parsePOintToState(point) {
+    return { ...point };
+  }
+
+  static parseStateToPoint(state) {
+    const point = { ...state };
+
+  }
+
 }
 
