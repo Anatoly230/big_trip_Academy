@@ -77,9 +77,8 @@ export default class BoardPresenter {
     render(this.#listView, this.#boardContainer);
     this.#pointsList = new PointsListPresenter({
       listComponent: this.#listView,
-      points: this.points,
-      cities: this.citiesData,
-      pointsModel: this.#pointsModel,
+      points: this.#pointsModel.points,
+      pointsSrc: this.#pointsModel.srcInfo,
     });
     this.#pointsList.init();
   }

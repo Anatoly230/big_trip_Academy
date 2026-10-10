@@ -12,27 +12,30 @@ export default class PointPresenter {
   #pointsContaner = null;
   #handleModeChange = null;
   #handleDataChange = null;
+  #point = null;
+  #pointsSrc = null;
 
   #pointView = null;
   #editPointView = null;
 
-  #point = null;
   #mode = Mode.DEFAULT;
 
-  constructor({ cities, pointsContaner, onModeChange, onDataChange }) {
+  constructor({ point, pointsSrc, pointsContaner, onModeChange }) {
+    this.point = point;
+    this.#pointsSrc = pointsSrc;
     this.#handleModeChange = onModeChange;
-    this.#handleDataChange = onDataChange;
-    this.cities = cities;
     this.#pointsContaner = pointsContaner;
   }
 
   createPoint(point) {
     this.#point = point;
-    this.#pointView = new PointView(
-      this.#point,
-      this.#handleEditClick.bind(this),
-      this.#onFavorite.bind(this)
-    );
+    this.#pointView = new PointView({
+      point: this.#point,
+      destination: this.#pointsSrc.destinationsIdBook[this.#point.destination],
+      offers: this.#point.offers.map((offer) => this.#pointsSrc.offersIdBook[offer]),
+      onRollUpClick: this.#handleEditClick.bind(this),
+      onFavoriteClick: this.#onFavorite.bind(this),
+    });
     this.#editPointView = new EditPointView(
       this.#point,
       this.cities,
@@ -62,7 +65,9 @@ export default class PointPresenter {
   }
 
   init(point) {
-    this.#point = point;
+    if (point) {
+      this.#point = point;
+    }
 
     const prevPointView = this.#pointView;
     const prevEditPointView = this.#editPointView;
@@ -127,7 +132,7 @@ export default class PointPresenter {
 
   #onFavorite() {
     console.log(this.#point)
-  //  this.#handleDataChange(UserAction.UPDATE_POINT, UpdateType.MINOR, {})
+    //  this.#handleDataChange(UserAction.UPDATE_POINT, UpdateType.MINOR, {})
     console.log('Favorite')
     // this.#pointView.updateElement({ isFavorite: favoriteState });
   }

@@ -64,6 +64,18 @@ export default class PointsModel extends Observable {
     return this.#offersTypeBook;
   }
 
+  get offersIdBook() {
+    if (!this.#offersIdBook) {
+      const heap = [];
+      for (const offer of this.#possibleOffers) {
+        heap.push(...offer.offers);
+      }
+      this.#offersIdBook = heap.reduce(this.#setByProp('id'), {});
+    }
+    return this.#offersIdBook;
+  }
+
+
   get allOfferTypes() {
     if (!this.#allOfferTypes) {
       this.#allOfferTypes = allOffers.map(function getType(el) { return el.type });
@@ -118,9 +130,10 @@ export default class PointsModel extends Observable {
     return this.possibleOffers.filter(getOffersByType)[0].offers;
   }
 
-  get pointsInfo() {
+  get srcInfo() {
     return {
       offersTypeBook: this.offersTypeBook,
+      offersIdBook: this.offersIdBook,
       offerTypes: this.allOfferTypes,
       cities: this.cities,
       destinationsNameBook: this.destinationsNameBook,

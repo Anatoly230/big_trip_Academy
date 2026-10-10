@@ -4,34 +4,28 @@ import PointPresenter from './point-presenter.js';
 
 export default class PointsListPresenter {
   #listComponent = null;
-  #pointsData = null;
-  #citiesData = null;
+  #points = null;
   #allPointPresenters = new Map();
   #editedPoint = null;
-  #pointsModel = null;
-  // #currentSortType = null;
-  // #currentFilterType = null;
+  #pointsSrc = null;
 
-  constructor({ listComponent, points, cities, pointsModel }) {
+
+  constructor({ listComponent, pointsSrc, points}) {
     this.#listComponent = listComponent;
-    this.#pointsData = points;
-    this.#citiesData = cities;
-    this.#pointsModel = pointsModel;
-    // this.#currentSortType = SortType.DEFAULT;
-    // this.#currentFilterType = FilterType.EVERETHING;
+    this.#points = points;
+    this.#pointsSrc = pointsSrc;
   }
 
-  init(points = this.#pointsData) {
-    for (const pointData of points) {
+  init(points = this.#points) {
+    for (const point of points) {
       const pointPresenter = new PointPresenter({
-        point: pointData,
-        cities: this.#citiesData,
+        point: point,
         pointsContaner: this.#listComponent,
-        onModeChange:this.#hanndleModeChange.bind(this),
-        pointsModel: this.#pointsModel,
+        pointsSrc: this.#pointsSrc,
+        onModeChange: this.#hanndleModeChange.bind(this),
       });
-      pointPresenter.init(pointData);
-      this.#allPointPresenters.set(pointData.point.id, pointPresenter);
+      pointPresenter.init(point);
+      this.#allPointPresenters.set(point.id, pointPresenter);
     }
   }
 
