@@ -1,7 +1,7 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { getPointDate } from '../utils/common.js';
 
-function createPointTemplate(point, destination, offers, {isFavorite}) {
+function createPointTemplate(point, destination, offers, { isFavorite }) {
   function getOffersItem(offer) {
     return `
           <li class="event__offer">
@@ -58,14 +58,18 @@ export default class PointView extends AbstractStatefulView {
   #onRollupClick = null;
   #onFavorite = null;
   #favoriteButton = null;
-  constructor({ point, destination, offers }, onRollUpClick, onFavoriteClick) {
+  #point = null;
+  #destination = null;
+  #offers = null;
+
+  constructor({ point, destination, offers, onRollUpClick, onFavoriteClick }) {
     super();
     this.#onFavorite = onFavoriteClick;
-    this.point = point;
-    this._state = { isFavorite: this.point.isFavorite };
-    this.destination = destination;
-    this.offers = offers;
     this.#onRollupClick = onRollUpClick;
+    this.#point = point;
+    this.#destination = destination;
+    this.#offers = offers;
+    this._setState(this.#point);
     this._restoreHandlers();
   }
 
@@ -76,7 +80,7 @@ export default class PointView extends AbstractStatefulView {
   }
 
   get template() {
-    return createPointTemplate(this.point, this.destination, this.offers, this._state);
+    return createPointTemplate(this.#point, this.#destination, this.#offers, this._state);
   }
 
   #onRollupClickHandler(evt) {
@@ -86,6 +90,6 @@ export default class PointView extends AbstractStatefulView {
 
   #onFavoriteClickHandler(evt) {
     evt.preventDefault();
-    this.#onFavorite(!this._state.isFavorite);
+    this.#onFavorite();
   }
 }

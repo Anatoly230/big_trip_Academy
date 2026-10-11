@@ -1,4 +1,5 @@
 # Файлы и папки операционной системы
+
 .DS_Store
 Thumbs.db
 
@@ -11,6 +12,5 @@ Thumbs.db
 *.log*
 node_modules/
 package-lock.json
-
 # Собранные файлы (допишите самостоятельно)
 ./build

@@ -3,15 +3,25 @@ import { getPointDate } from '../utils/common.js';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/themes/material_blue.css';
 
-function createEditPointForm({ cities, offersTypes, state }) {
+
+function createEditPointForm({
+  state,
+  cities,
+  destinationsIdBook,
+  offersTypes,
+  offersTypeBook }) {
+  const destination = destinationsIdBook[state.destination];
+  const offers = offersTypeBook[state.type];
+  const offersIdBook = state.offers.reduce((book, item) => { book[item] = true; return book; }, {})
   const startDate = getPointDate(state.dateFrom);
   const endDate = getPointDate(state.dateTo);
 
   function createOfferButtonTemplate({ option, price, id },) {
+
     return `
            <div class="event__offer-selector">
              <input class="event__offer-checkbox  visually-hidden" id="${id}" type="checkbox" name="event-offer-luggage"
-               ${state.offers.some(function isHasId(el) { return el.id === id; }) ? 'checked' : ''}>
+               ${offersIdBook[id] ? 'checked' : ''}>
              <label class="event__offer-label" for="${id}">
                <span class="event__offer-title">${option}</span>
                +€&nbsp;
@@ -25,7 +35,7 @@ function createEditPointForm({ cities, offersTypes, state }) {
     return `
      <div class="event__type-item">
         <input id="${offerType}" class="event__type-input  visually-hidden" type="radio" name="event-type"
-          value="${offerType}" ${state.pointType === offerType ? 'checked' : ''}>
+          value="${offerType}" ${state.type === offerType ? 'checked' : ''}>
         <label class="event__type-label  event__type-label--${offerType.toLowerCase()}" for="${offerType}">${offerType}</label>
       </div>
     `;
@@ -38,11 +48,11 @@ function createEditPointForm({ cities, offersTypes, state }) {
   function createCitiesList(cityList) {
     return `
             <div class="event__field-group  event__field-group--destination">
-               <label class="event__label  event__type-output" for="id="${state.destination.id}">
-                 ${state.pointType}
+               <label class="event__label  event__type-output" for="id="${destination.id}">
+                 ${state.type}
                </label>
-               <input class="event__input  event__input--destination" id="${state.destination.id}" type="text"
-                 name="event-destination" value="${state.destination.name}" list="destination-list-1">
+               <input class="event__input  event__input--destination" id="${destination.id}" type="text"
+                 name="event-destination" value="${destination.name}" list="destination-list-1">
                <datalist id="destination-list-1">
                  ${cityList.map(getCityOption).join('')}
                </datalist>
@@ -73,7 +83,7 @@ function createEditPointForm({ cities, offersTypes, state }) {
              <div class="event__type-wrapper">
                <label class="event__type  event__type-btn" for="event-type-toggle-1">
                  <span class="visually-hidden">Choose event type</span>
-                 <img class="event__type-icon" width="17" height="17" src="img/icons/${state.pointType.toLowerCase()}.png"
+                 <img class="event__type-icon" width="17" height="17" src="img/icons/${state.type.toLowerCase()}.png"
                    alt="Event type icon">
                </label>
                <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox">
@@ -108,16 +118,16 @@ function createEditPointForm({ cities, offersTypes, state }) {
              <section class="event__section  event__section--offers">
                <h3 class="event__section-title  event__section-title--offers">Offers</h3>
                <div class="event__available-offers">
-                 ${state.possibleOffers.map(createOfferButtonTemplate).join('')}
+                 ${offers.map(createOfferButtonTemplate).join('')}
                </div>
              </section>
 
              <section class="event__section  event__section--destination">
                <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-               <p class="event__destination-description">${state.destination.description}</p>
+               <p class="event__destination-description">${destination.description}</p>
                <div class="event__photos-container">
                  <div class="event__photos-tape">
-                   ${state.destination.pictures.map(getDestinationImages).join('')}
+                   {destination.pictures.map(getDestinationImages).join('')}
                  </div>
                </div>
              </section>
@@ -132,35 +142,25 @@ export default class EditPointView extends AbstractStatefulView {
   #submitButton = null;
   #onDestination = null;
   #onEventType = null;
-  #onDateChange = null;
   #calenders = null;
-  constructor(
-    { point, destination, offers, possibleOffers, offersTypes },
-    cities,
-    onRollUpClick,
+  #pointsSrc = null;
+  #point = null;
+  constructor({
+    point,
+    pointsSrc,
+    onCloseEdit,
     onSubmit,
     onDestination,
     onEventType,
-    onDateChange,
-  ) {
+  }) {
     super();
-    this.#onRollupClick = onRollUpClick;
+    this.#pointsSrc = pointsSrc;
+    this.#onRollupClick = onCloseEdit;
     this.#onSubmit = onSubmit;
     this.#onDestination = onDestination;
     this.#onEventType = onEventType;
-    this.#onDateChange = onDateChange;
-    this.point = point;
-    this.allCities = cities;
-    this.offersTypes = offersTypes;
-    this._state = {
-      offers: offers,
-      basePrice: point.basePrice,
-      dateFrom: point.dateFrom,
-      dateTo: point.dateTo,
-      pointType: point.type,
-      possibleOffers: possibleOffers,
-      destination: destination,
-    };
+    this.#point = point;
+    this._setState(this.#point);
     this._restoreHandlers();
   }
 
@@ -179,8 +179,10 @@ export default class EditPointView extends AbstractStatefulView {
   get template() {
     return createEditPointForm({
       state: this._state,
-      cities: this.allCities,
-      offersTypes: this.offersTypes,
+      cities: this.#pointsSrc.cities,
+      destinationsIdBook: this.#pointsSrc.destinationsIdBook,
+      offersTypes: this.#pointsSrc.offersTypes,
+      offersTypeBook: this.#pointsSrc.offersTypeBook
     });
   }
 
@@ -197,7 +199,7 @@ export default class EditPointView extends AbstractStatefulView {
   }
 
   #destrtoyPicker() {
-    this.#calenders.forEach((calendar) => { calendar.destroy() })
+    this.#calenders.forEach((calendar) => { calendar.destroy() });
     this.calendar = null;
   }
 
@@ -259,5 +261,19 @@ export default class EditPointView extends AbstractStatefulView {
         break;
     }
   }
+
+  #onDateChange(dateChanges) {
+    this.updateElement(dateChanges);
+  }
+
+  static parsePointToState(point) {
+    return { ...point };
+  }
+
+  static parseStateToPoint(state) {
+    const point = { ...state };
+
+  }
+
 }
 

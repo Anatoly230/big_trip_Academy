@@ -4,7 +4,7 @@ import ListView from '../view/list-view.js';
 import PointsListPresenter from './points-list-presenter.js';
 import SortModel from '../model/sort-model.js';
 import SortPresenter from './sort-presenter.js';
-import { FilterType, SortType } from '../const.js';
+import { FilterType, SortType, UpdateType } from '../const.js';
 import { filters } from '../utils/filters.js';
 import { sortPriceUp, sortTimeUp } from '../utils/sorts.js';
 
@@ -18,19 +18,32 @@ export default class BoardPresenter {
   #filterType = FilterType.EVERETHING;
   #sortType = SortType.DEFAULT;
   #noPointsView = null;
+  #pointsListPresenter = null;
 
   constructor({ boardContainer, pointsModel, filterModel }) {
     this.#boardContainer = boardContainer;
     this.#pointsModel = pointsModel;
     this.#filterModel = filterModel;
-    this.possibleOffers = [...this.#pointsModel.possibleOffers];
-    this.pointsData = this.#pointsModel.fullDataList;
-    this.citiesData = this.#pointsModel.cities;
+
+    this.#pointsModel.addObserver(this.#handleModelEvent);
+    this.#filterModel.addObserver(this.#handleModelEvent);
   }
 
+  #handleModelEvent(updateType, data) {
+    switch (updateType) {
+      case UpdateType.PATCH:
+        this.#pointsListPresenter.getPointPresenter(data.id);
+        break;
+      case UpdateType.MINOR:
+        this.#clearBoard();
+        this.#renderBoard();
+        break;
+    }
+  }
+  //выдаёт уже отфильтрованные и отсортированные точки
   get points() {
     this.#filterType = this.#filterModel.filter;
-    const points = this.#pointsModel.fullDataList;
+    const points = this.#pointsModel.points;
     const filtredPoints = filters[this.#filterType](points);
 
     switch (this.#sortType) {
@@ -59,13 +72,12 @@ export default class BoardPresenter {
 
   #renderPoints() {
     render(this.#listView, this.#boardContainer);
-    this.pointsList = new PointsListPresenter(
-      this.#listView,
-      this.points,
-      this.citiesData,
-      this.#pointsModel,
-    );
-    this.pointsList.init();
+    this.#pointsListPresenter = new PointsListPresenter({
+      listComponent: this.#listView,
+      points: this.#pointsModel.points,
+      pointsSrc: this.#pointsModel.srcInfo,
+    });
+    this.#pointsListPresenter.init();
   }
 
   #renderBoard() {
@@ -78,7 +90,7 @@ export default class BoardPresenter {
   }
 
   #clearBoard() {
-    this.pointsList.removePoints();
+    this.#pointsListPresenter.removePoints();
   }
 
 }
