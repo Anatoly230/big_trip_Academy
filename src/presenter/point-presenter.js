@@ -20,11 +20,12 @@ export default class PointPresenter {
 
   #mode = Mode.DEFAULT;
 
-  constructor({ point, pointsSrc, pointsContaner, onModeChange }) {
+  constructor({ point, pointsSrc, pointsContaner, onModeChange, onDateChange }) {
     this.point = point;
     this.#pointsSrc = pointsSrc;
     this.#handleModeChange = onModeChange;
     this.#pointsContaner = pointsContaner;
+    this.#handleModeChange = onDateChange;
   }
 
   createPoint(point) {
@@ -34,7 +35,7 @@ export default class PointPresenter {
       destination: this.#pointsSrc.destinationsIdBook[this.#point.destination],
       offers: this.#point.offers.map((offer) => this.#pointsSrc.offersIdBook[offer]),
       onRollUpClick: this.#handleEditClick.bind(this),
-      onFavoriteClick: this.#onFavorite.bind(this),
+      onFavoriteClick: this.#handleFavoriteClick.bind(this),
     });
     this.#editPointView = new EditPointView({
       point: this.#point,
@@ -94,12 +95,11 @@ export default class PointPresenter {
   resetView() {
     if (this.#mode !== Mode.DEFAULT) {
       this.#replaceFormToCard();
-      // this.#editPointView.reset(this.#point);
+      this.#editPointView.reset(this.#point);
     }
   }
 
   #replaceCardToForm() {
-    this.#handleModeChange(this.#point.id);
     replace(this.#editPointView, this.#pointView);
     document.addEventListener('keydown', this.#escKeyDownHandler);
     this.#mode = Mode.EDITING;
@@ -114,6 +114,7 @@ export default class PointPresenter {
   #escKeyDownHandler = (evt) => {
     if (evt.key === 'Escape') {
       evt.preventDefault();
+      this.#editPointView.reset(this.#point);
       this.#replaceFormToCard();
     }
   };
@@ -130,8 +131,7 @@ export default class PointPresenter {
     console.log('its save');
   }
 
-  #onFavorite() {
-    console.log(this.#point)
+  #handleFavoriteClick() {
     //  this.#handleDataChange(UserAction.UPDATE_POINT, UpdateType.MINOR, {})
     console.log('Favorite')
     // this.#pointView.updateElement({ isFavorite: favoriteState });
@@ -154,5 +154,8 @@ export default class PointPresenter {
     });
   }
 
+  #onDateChange(dateChanges) {
+    this.#editPointView.updateElement(dateChanges);
+  }
 
 }

@@ -144,7 +144,7 @@ export default class EditPointView extends AbstractStatefulView {
   #onEventType = null;
   #calenders = null;
   #pointsSrc = null;
-  #point = null;
+
   constructor({
     point,
     pointsSrc,
@@ -159,8 +159,7 @@ export default class EditPointView extends AbstractStatefulView {
     this.#onSubmit = onSubmit;
     this.#onDestination = onDestination;
     this.#onEventType = onEventType;
-    this.#point = point;
-    this._setState(this.#point);
+    this._setState(EditPointView.parsePointToState(point));
     this._restoreHandlers();
   }
 
@@ -184,6 +183,10 @@ export default class EditPointView extends AbstractStatefulView {
       offersTypes: this.#pointsSrc.offersTypes,
       offersTypeBook: this.#pointsSrc.offersTypeBook
     });
+  }
+
+  resetPoint(point) {
+    this.updateElement(EditPointView.parsePointToState(point));
   }
 
   #setDatePicker() {
@@ -272,7 +275,7 @@ export default class EditPointView extends AbstractStatefulView {
 
   static parseStateToPoint(state) {
     const point = { ...state };
-
+    return point;
   }
 
 }

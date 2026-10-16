@@ -4,7 +4,7 @@ import ListView from '../view/list-view.js';
 import PointsListPresenter from './points-list-presenter.js';
 import SortModel from '../model/sort-model.js';
 import SortPresenter from './sort-presenter.js';
-import { FilterType, SortType, UpdateType } from '../const.js';
+import { FilterType, SortType, UpdateType, UserAction } from '../const.js';
 import { filters } from '../utils/filters.js';
 import { sortPriceUp, sortTimeUp } from '../utils/sorts.js';
 
@@ -29,17 +29,41 @@ export default class BoardPresenter {
     this.#filterModel.addObserver(this.#handleModelEvent);
   }
 
-  #handleModelEvent(updateType, data) {
-    switch (updateType) {
-      case UpdateType.PATCH:
-        this.#pointsListPresenter.getPointPresenter(data.id);
+  #handleViewAction(actionType, apdateType, update) {
+    switch (actionType) {
+      case UserAction.UPDATE_POINT:
+        console.log('UPDATE_POINT UserAction');
+        this.#pointsModel.updatePoint(apdateType, update);
         break;
-      case UpdateType.MINOR:
-        this.#clearBoard();
-        this.#renderBoard();
+      case UserAction.ADD_POINT:
+        console.log('ADD_POINT UserAction');
+        this.#pointsModel.addPoint(apdateType, update);
+        break;
+      case UserAction.DELETE_POINT:
+        console.log('DELETE_POINT UserAction');
+        this.#pointsModel.deletePoint(apdateType, update);
         break;
     }
   }
+
+  #handleModelEvent(updateType, data) {
+    switch (updateType) {
+      case UpdateType.PATCH:
+        console.log('PATCH Update');
+        this.#pointsListPresenter.getPointPresenter(data.id).init(data);
+        break;
+      case UpdateType.MINOR:
+        console.log('Minor Update');
+        this.#clearBoard();
+        this.#renderBoard();
+        break;
+      case UpdateType.MAJOR:
+        console.log('Major Update');
+        this.#clearBoard();
+        this.#renderBoard();
+    }
+  }
+
   //выдаёт уже отфильтрованные и отсортированные точки
   get points() {
     this.#filterType = this.#filterModel.filter;
@@ -76,6 +100,7 @@ export default class BoardPresenter {
       listComponent: this.#listView,
       points: this.#pointsModel.points,
       pointsSrc: this.#pointsModel.srcInfo,
+      onDataChange: this.#handleViewAction,
     });
     this.#pointsListPresenter.init();
   }
