@@ -8,12 +8,14 @@ export default class PointsListPresenter {
   #allPointPresenters = new Map();
   #editedPoint = null;
   #pointsSrc = null;
+  #handleDataChange = null;
 
 
-  constructor({ listComponent, pointsSrc, points}) {
+  constructor({ listComponent, pointsSrc, points, onDataChange }) {
     this.#listComponent = listComponent;
     this.#points = points;
     this.#pointsSrc = pointsSrc;
+    this.#handleDataChange = onDataChange;
   }
 
   init(points = this.#points) {
@@ -22,7 +24,8 @@ export default class PointsListPresenter {
         point: point,
         pointsContaner: this.#listComponent,
         pointsSrc: this.#pointsSrc,
-        onModeChange: this.#hanndleModeChange.bind(this),
+        onModeChange: this.#handleModeChange.bind(this),
+        onDataChange: this.#handleDataChange.bind(this),
       });
       pointPresenter.init(point);
       this.#allPointPresenters.set(point.id, pointPresenter);
@@ -59,7 +62,7 @@ export default class PointsListPresenter {
   //   this.init(sortedPoints);
   // }
 
-  #hanndleModeChange(id) {
+  #handleModeChange(id) {
     if (!this.#editedPoint) {
       this.#editedPoint = id;
     }

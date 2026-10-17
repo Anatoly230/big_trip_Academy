@@ -20,12 +20,12 @@ export default class PointPresenter {
 
   #mode = Mode.DEFAULT;
 
-  constructor({ point, pointsSrc, pointsContaner, onModeChange, onDateChange }) {
+  constructor({ point, pointsSrc, pointsContaner, onModeChange, onDataChange }) {
     this.point = point;
     this.#pointsSrc = pointsSrc;
-    this.#handleModeChange = onModeChange;
     this.#pointsContaner = pointsContaner;
-    this.#handleModeChange = onDateChange;
+    this.#handleModeChange = onModeChange;
+    this.#handleDataChange = onDataChange;
   }
 
   createPoint(point) {
@@ -94,12 +94,15 @@ export default class PointPresenter {
 
   resetView() {
     if (this.#mode !== Mode.DEFAULT) {
+      this.#editPointView.reset(this.#point); // перевод в изначальное положение данных во view возможно только 
+      // тогда когда она находится в дереве html, если её от туда забрать, то parent элемент будет являться null, 
+      // поэтому эта оперция должна стоять раньше метода this.#replaceFormToCard(), так как он выдирает view из дерева html 
       this.#replaceFormToCard();
-      this.#editPointView.reset(this.#point);
     }
   }
 
   #replaceCardToForm() {
+    this.#handleModeChange(this.#point.id);
     replace(this.#editPointView, this.#pointView);
     document.addEventListener('keydown', this.#escKeyDownHandler);
     this.#mode = Mode.EDITING;
@@ -114,8 +117,7 @@ export default class PointPresenter {
   #escKeyDownHandler = (evt) => {
     if (evt.key === 'Escape') {
       evt.preventDefault();
-      this.#editPointView.reset(this.#point);
-      this.#replaceFormToCard();
+      this.resetView();
     }
   };
 
@@ -124,7 +126,7 @@ export default class PointPresenter {
   }
 
   #handleCloseEditClick() {
-    this.#replaceFormToCard();
+    this.resetView();
   }
 
   #saveEditPoint() {
@@ -132,17 +134,18 @@ export default class PointPresenter {
   }
 
   #handleFavoriteClick() {
-    //  this.#handleDataChange(UserAction.UPDATE_POINT, UpdateType.MINOR, {})
-    console.log('Favorite')
-    // this.#pointView.updateElement({ isFavorite: favoriteState });
+    this.#handleDataChange(
+      UserAction.UPDATE_POINT,
+      UpdateType.PATCH,
+      { ...this.#point, isFavorite: !this.#point.isFavorite });
   }
 
   #onDestination(cityName) {
     const newDestination = this.pointsModel.destinationsByName[cityName];
-    this.#editPointView.updateElement({
-      destination: newDestination,
-      offers: [],
-    });
+    // this.#editPointView.updateElement({
+    //   destination: newDestination,
+    //   offers: [],
+    // });
   }
 
   #onEventType(newType) {

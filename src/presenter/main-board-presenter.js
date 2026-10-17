@@ -25,8 +25,8 @@ export default class BoardPresenter {
     this.#pointsModel = pointsModel;
     this.#filterModel = filterModel;
 
-    this.#pointsModel.addObserver(this.#handleModelEvent);
-    this.#filterModel.addObserver(this.#handleModelEvent);
+    this.#pointsModel.addObserver(this.#handleModelEvent.bind(this));
+    this.#filterModel.addObserver(this.#handleModelEvent.bind(this));
   }
 
   #handleViewAction(actionType, apdateType, update) {
@@ -100,7 +100,7 @@ export default class BoardPresenter {
       listComponent: this.#listView,
       points: this.#pointsModel.points,
       pointsSrc: this.#pointsModel.srcInfo,
-      onDataChange: this.#handleViewAction,
+      onDataChange: this.#handleViewAction.bind(this),
     });
     this.#pointsListPresenter.init();
   }

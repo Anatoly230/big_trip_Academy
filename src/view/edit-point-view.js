@@ -8,7 +8,7 @@ function createEditPointForm({
   state,
   cities,
   destinationsIdBook,
-  offersTypes,
+  offerTypes,
   offersTypeBook }) {
   const destination = destinationsIdBook[state.destination];
   const offers = offersTypeBook[state.type];
@@ -87,7 +87,7 @@ function createEditPointForm({
                    alt="Event type icon">
                </label>
                <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox">
-             ${createEventList(offersTypes)}
+             ${createEventList(offerTypes)}
              ${createCitiesList(cities)}
              <div class="event__field-group  event__field-group--time">
                <label class="visually-hidden" for="event-start-time-1">From</label>
@@ -141,7 +141,6 @@ export default class EditPointView extends AbstractStatefulView {
   #onSubmit = null;
   #submitButton = null;
   #onDestination = null;
-  #onEventType = null;
   #calenders = null;
   #pointsSrc = null;
 
@@ -151,14 +150,12 @@ export default class EditPointView extends AbstractStatefulView {
     onCloseEdit,
     onSubmit,
     onDestination,
-    onEventType,
   }) {
     super();
     this.#pointsSrc = pointsSrc;
     this.#onRollupClick = onCloseEdit;
     this.#onSubmit = onSubmit;
     this.#onDestination = onDestination;
-    this.#onEventType = onEventType;
     this._setState(EditPointView.parsePointToState(point));
     this._restoreHandlers();
   }
@@ -167,11 +164,10 @@ export default class EditPointView extends AbstractStatefulView {
     this.#submitButton = this.element.querySelector('.event__save-btn');
     this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#onRollUpClickHandler.bind(this));
     this.#submitButton.addEventListener('click', this.#onSubmitHandler.bind(this));
-    this.element.querySelector('.event__available-offers').addEventListener('click', this.#onOffersClick.bind(this));
+    this.element.querySelector('.event__available-offers').addEventListener('change', this.#onOffersClick.bind(this));
     this.element.querySelector('.event__input--price').addEventListener('change', this.#onPriceChange.bind(this));
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#onDestinationChange.bind(this));
-    this.element.querySelector('.event__type-group').addEventListener('click', this.#onEventTypeClick.bind(this));
-    this.element.querySelector('.event__type-group').addEventListener('click', this.#onEventTypeClick.bind(this));
+    this.element.querySelector('.event__type-group').addEventListener('change', this.#onEventTypeClick.bind(this));
     this.#setDatePicker();
   }
 
@@ -180,12 +176,12 @@ export default class EditPointView extends AbstractStatefulView {
       state: this._state,
       cities: this.#pointsSrc.cities,
       destinationsIdBook: this.#pointsSrc.destinationsIdBook,
-      offersTypes: this.#pointsSrc.offersTypes,
+      offerTypes: this.#pointsSrc.offerTypes,
       offersTypeBook: this.#pointsSrc.offersTypeBook
     });
   }
 
-  resetPoint(point) {
+  reset(point) {
     this.updateElement(EditPointView.parsePointToState(point));
   }
 
@@ -218,18 +214,24 @@ export default class EditPointView extends AbstractStatefulView {
   }
 
   #onOffersClick(evt) {
-    if (evt.target.id && evt.target.tagName === 'INPUT') {
-      this.#updateOffers(evt);
-    }
+    this.#updateOffers(evt);
   }
 
   #updateOffers(evt) {
     const offerId = evt.target.id;
-    const compareOffers = this._state.offers.filter(({ id }) => id !== offerId);
-    this._state.offers = compareOffers.length === this._state.offers.length
-      ? [...this._state.offers, ...this._state.possibleOffers.filter(({ id }) => id === offerId)]
-      : compareOffers;
+    const isContain = this._state.offers.some((id) => id === offerId);
+    if (isContain) {
+      this._state.offers = this._state.offers.filter((id) => id !== offerId);
+    } else {
+      this._state.offers.push(offerId);
+    }
+    console.log('on ofers change', this._state)
   }
+
+  #onEventTypeClick(evt) {
+    this.updateElement({ ...this._state, type: evt.target.value, offers: [] })
+  }
+
 
   #updatePrice(evt) {
     this._state = { ...this._state, basePrice: evt.target.value };
@@ -240,29 +242,26 @@ export default class EditPointView extends AbstractStatefulView {
   }
 
   #onDestinationChange(evt) {
-    if (evt.target.name === 'event-destination' && evt.target.value) {
-      this.#onDestination(evt.target.value);
-    }
+    const newDestId = this.#pointsSrc.destinationsNameBook[evt.target.value]['id'];
+    this.updateElement({ ...this._state, destination: newDestId })
   }
 
-  #onEventTypeClick(evt) {
-    const newEventType = evt.target.value;
-    if (evt.target.classList.contains('event__type-input') && newEventType !== this._state.pointType) {
-      this.#onEventType(newEventType);
-    }
-  }
 
   #onDateChangeHandler(sd, dstr, inst) {
+    console.log('before - dateFrom',...this._state.dateFrom)
+    console.log('before - dateFrom',...this._state.dateTo)
     switch (inst.input.name) {
       case 'event-start-time':
         this.#destrtoyPicker();
-        this.#onDateChange({ dateFrom: new Date(sd[0]).toJSON() });
+        this._setState({ ...this._state, dateFrom: new Date(sd[0]).toJSON() });
+        console.log('after - dateFrom',...this._state.dateFrom)
         break;
-      case 'event-end-time':
-        this.#destrtoyPicker();
-        this.#onDateChange({ dateTo: new Date(sd[0]).toJSON() })
-        break;
-    }
+        case 'event-end-time':
+          this.#destrtoyPicker();
+          this._setState({...this._state, dateTo: new Date(sd[0]).toJSON() })
+          console.log('after - dateFrom',...this._state.dateTo)
+          break;
+        }
   }
 
   #onDateChange(dateChanges) {

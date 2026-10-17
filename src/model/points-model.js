@@ -6,30 +6,30 @@ import { destinations } from '../mock/destination-mock.js';
 
 export default class PointsModel extends Observable {
   #allPoints = null;
-  #possibleOffers = null;
-  #allOfferTypes = null;
+  #offers = null;
+  #offerTypes = null;
   #allCities = null;
   #destinations = null;
   #destinationsIdBook = null;
   #destinationsNameBook = null;
-  #fullDataList = null;
   #pointsIdBook = null;
   #offersIdBook = null;
   #offersTypeBook = null;
 
 
   updatePoint(updateType, update) {
-    this._notyfy(updateType, update);
+    this.pointsIdBook[update.id] = update;
+    this._notify(updateType, update);
   }
 
   addPoint(updateType, update) {
-    this._notyfy(updateType, update);
+    this._notify(updateType, update);
 
   }
 
   deletePoint(updateType, update) {
 
-    this._notyfy(updateType, update);
+    this._notify(updateType, update);
   }
 
 
@@ -47,16 +47,16 @@ export default class PointsModel extends Observable {
     return this.#allCities;
   }
 
-  get possibleOffers() {
-    if (!this.#possibleOffers) {
-      this.#possibleOffers = allOffers;
+  get offers() {
+    if (!this.#offers) {
+      this.#offers = allOffers;
     }
-    return this.#possibleOffers;
+    return this.#offers;
   }
 
   get offersTypeBook() {
     if (!this.#offersTypeBook) {
-      this.#offersTypeBook = this.possibleOffers.reduce((book, item) => {
+      this.#offersTypeBook = this.offers.reduce((book, item) => {
         book[item.type] = item.offers;
         return book;
       }, {});
@@ -67,7 +67,7 @@ export default class PointsModel extends Observable {
   get offersIdBook() {
     if (!this.#offersIdBook) {
       const heap = [];
-      for (const offer of this.#possibleOffers) {
+      for (const offer of this.#offers) {
         heap.push(...offer.offers);
       }
       this.#offersIdBook = heap.reduce(this.#setByProp('id'), {});
@@ -76,11 +76,11 @@ export default class PointsModel extends Observable {
   }
 
 
-  get allOfferTypes() {
-    if (!this.#allOfferTypes) {
-      this.#allOfferTypes = allOffers.map(function getType(el) { return el.type });
+  get offerTypes() {
+    if (!this.#offerTypes) {
+      this.#offerTypes = allOffers.map(function getType(el) { return el.type });
     }
-    return this.#allOfferTypes;
+    return this.#offerTypes;
   }
 
   get destinations() {
@@ -120,14 +120,14 @@ export default class PointsModel extends Observable {
     function getOffersByType(el) {
       return el.type === pointType;
     }
-    return this.possibleOffers.filter(getOffersByType)[0].offers;
+    return this.offers.filter(getOffersByType)[0].offers;
   }
 
   get srcInfo() {
     return {
       offersTypeBook: this.offersTypeBook,
       offersIdBook: this.offersIdBook,
-      offersTypes: this.allOfferTypes,
+      offerTypes: this.offerTypes,
       cities: this.cities,
       destinationsNameBook: this.destinationsNameBook,
       destinationsIdBook: this.destinationsIdBook,
