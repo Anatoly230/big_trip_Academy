@@ -33,8 +33,9 @@ function createPointTemplate({ state, destination, offers }) {
               <p class="event__duration">${diffDate}M</p>
             </div>
             <p class="event__price">
-              &euro;&nbsp;<span class="event__price-value">${state.basePrice}</span>
-            </p>
+              &euro;&nbsp;<span class="event__price-value">${offers.reduce((summ, { price }) => { summ += price; return summ; }, 0) + state.basePrice
+    }</span >
+            </p >
             <h4 class="visually-hidden">Offers:</h4>
             <ul class="event__selected-offers">
               ${offers.map(getOffersItem).join('')}
@@ -49,8 +50,8 @@ function createPointTemplate({ state, destination, offers }) {
             <button class="event__rollup-btn" type="button">
               <span class="visually-hidden">Open event</span>
             </button>
-          </div>
-        </li>
+          </div >
+        </li >
   `;
 }
 

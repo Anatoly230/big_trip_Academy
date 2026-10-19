@@ -12,16 +12,25 @@ function createEditPointForm({
   offersTypeBook }) {
   const destination = destinationsIdBook[state.destination];
   const offers = offersTypeBook[state.type];
-  const offersIdBook = state.offers.reduce((book, item) => { book[item] = true; return book; }, {})
+  const selectedOffersIdBook = state.offers.reduce((book, item) => { book[item] = true; return book; }, {})
   const startDate = getPointDate(state.dateFrom);
   const endDate = getPointDate(state.dateTo);
 
-  function createOfferButtonTemplate({ option, price, id },) {
+  function getTotalCost(basePrice) {
+    let selectedOffersPrice = 0;
+    offers.forEach(({ id, price }) => {
+      if (selectedOffersIdBook[id]) {
+        selectedOffersPrice += price;
+      }
+    })
+    return selectedOffersPrice + basePrice;
+  }
 
+  function createOfferButtonTemplate({ option, price, id },) {
     return `
            <div class="event__offer-selector">
              <input class="event__offer-checkbox  visually-hidden" id="${id}" type="checkbox" name="event-offer-luggage"
-               ${offersIdBook[id] ? 'checked' : ''}>
+               ${selectedOffersIdBook[id] ? 'checked' : ''}>
              <label class="event__offer-label" for="${id}">
                <span class="event__offer-title">${option}</span>
                +€&nbsp;
@@ -104,35 +113,35 @@ function createEditPointForm({
                  <span class="visually-hidden">Price</span>
                  €
                </label>
-               <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price"
-                 value="${state.basePrice}">
-             </div>
+               <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" disabled
+                 value="${getTotalCost(state.basePrice)} ">
+             </div >
 
              <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
              <button class="event__reset-btn" type="reset">Delete</button>
              <button class="event__rollup-btn" type="button">
                <span class="visually-hidden">Open event</span>
              </button>
-           </header>
-           <section class="event__details">
-             <section class="event__section  event__section--offers">
-               <h3 class="event__section-title  event__section-title--offers">Offers</h3>
-               <div class="event__available-offers">
-                 ${offers.map(createOfferButtonTemplate).join('')}
-               </div>
-             </section>
+           </header >
+  <section class="event__details">
+    <section class="event__section  event__section--offers">
+      <h3 class="event__section-title  event__section-title--offers">Offers</h3>
+      <div class="event__available-offers">
+        ${offers.map(createOfferButtonTemplate).join('')}
+      </div>
+    </section>
 
-             <section class="event__section  event__section--destination">
-               <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-               <p class="event__destination-description">${destination.description}</p>
-               <div class="event__photos-container">
-                 <div class="event__photos-tape">
-                   {destination.pictures.map(getDestinationImages).join('')}
-                 </div>
-               </div>
-             </section>
-           </section>
-         </form>
+    <section class="event__section  event__section--destination">
+      <h3 class="event__section-title  event__section-title--destination">Destination</h3>
+      <p class="event__destination-description">${destination.description}</p>
+      <div class="event__photos-container">
+        <div class="event__photos-tape">
+          {destination.pictures.map(getDestinationImages).join('')}
+        </div>
+      </div>
+    </section>
+  </section>
+         </form >
   `;
 }
 
@@ -164,6 +173,7 @@ export default class EditPointView extends AbstractStatefulView {
     this.#submitButton = this.element.querySelector('.event__save-btn');
     this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#onRollUpClickHandler.bind(this));
     this.#submitButton.addEventListener('click', this.#onSubmitHandler.bind(this));
+    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#onDeleteHandler.bind(this));
     this.element.querySelector('.event__available-offers').addEventListener('change', this.#onOffersClick.bind(this));
     this.element.querySelector('.event__input--price').addEventListener('change', this.#onPriceChange.bind(this));
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#onDestinationChange.bind(this));
@@ -209,9 +219,13 @@ export default class EditPointView extends AbstractStatefulView {
 
   #onSubmitHandler(evt) {
     evt.preventDefault();
-    this.#onSubmit();
+    this.#onSubmit(EditPointView.parseStateToPoint(this._state));
     this.#submitButton.disabled = true;
   }
+
+#onDeleteHandler(){
+  console.log('on delete')
+}
 
   #onOffersClick(evt) {
     this.#updateOffers(evt);
@@ -225,7 +239,8 @@ export default class EditPointView extends AbstractStatefulView {
     } else {
       this._state.offers.push(offerId);
     }
-    console.log('on ofers change', this._state)
+    this.updateElement(this._state)
+    // console.log('on ofers change', this._state)
   }
 
   #onEventTypeClick(evt) {
@@ -243,30 +258,23 @@ export default class EditPointView extends AbstractStatefulView {
 
   #onDestinationChange(evt) {
     const newDestId = this.#pointsSrc.destinationsNameBook[evt.target.value]['id'];
-    this.updateElement({ ...this._state, destination: newDestId })
+    this.updateElement({ ...this._state, destination: newDestId, offers: [] })
   }
 
 
   #onDateChangeHandler(sd, dstr, inst) {
-    console.log('before - dateFrom',...this._state.dateFrom)
-    console.log('before - dateFrom',...this._state.dateTo)
     switch (inst.input.name) {
       case 'event-start-time':
         this.#destrtoyPicker();
-        this._setState({ ...this._state, dateFrom: new Date(sd[0]).toJSON() });
-        console.log('after - dateFrom',...this._state.dateFrom)
+        this.updateElement({ ...this._state, dateFrom: new Date(sd[0]).toJSON() });
         break;
-        case 'event-end-time':
-          this.#destrtoyPicker();
-          this._setState({...this._state, dateTo: new Date(sd[0]).toJSON() })
-          console.log('after - dateFrom',...this._state.dateTo)
-          break;
-        }
+      case 'event-end-time':
+        this.#destrtoyPicker();
+        this.updateElement({ ...this._state, dateTo: new Date(sd[0]).toJSON() })
+        break;
+    }
   }
 
-  #onDateChange(dateChanges) {
-    this.updateElement(dateChanges);
-  }
 
   static parsePointToState(point) {
     return { ...point };

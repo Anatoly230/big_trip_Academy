@@ -41,23 +41,11 @@ export default class PointPresenter {
       point: this.#point,
       pointsSrc: this.#pointsSrc,
       onCloseEdit: this.#handleCloseEditClick.bind(this),
-      onSave: this.#saveEditPoint.bind(this),
+      onSubmit: this.#saveEditPoint.bind(this),
       onDestination: this.#onDestination.bind(this),
       onEventType: this.#onEventType.bind(this),
     }
     );
-  }
-
-  #updatePointsViews() {
-    this.#editPointView.updateElement({
-      offers: this.point.offers,
-      basePrice: this.point.point.basePrice,
-      dateFrom: this.point.point.dateFrom,
-      dateTo: this.point.point.dateTo,
-      pointType: this.point.point.type,
-      possibleOffers: this.point.possibleOffers,
-      destination: this.point.destination,
-    });
   }
 
   removePoint() {
@@ -129,8 +117,10 @@ export default class PointPresenter {
     this.resetView();
   }
 
-  #saveEditPoint() {
+  #saveEditPoint(update) {
     console.log('its save');
+    this.#handleDataChange(UserAction.UPDATE_POINT, UpdateType.PATCH, update);
+    this.#replaceFormToCard();
   }
 
   #handleFavoriteClick() {
