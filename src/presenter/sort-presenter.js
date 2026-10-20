@@ -27,4 +27,7 @@ export default class SortPresenter {
   #handleSortModelEvent() {
     // this.#sortView.updateElement({ sorts: getSorts(this.#sortModel.sortType) });
   }
+  delete() {
+    this.#sortView.element.remove();
+  }
 }

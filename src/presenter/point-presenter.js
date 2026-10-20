@@ -42,8 +42,7 @@ export default class PointPresenter {
       pointsSrc: this.#pointsSrc,
       onCloseEdit: this.#handleCloseEditClick.bind(this),
       onSubmit: this.#saveEditPoint.bind(this),
-      onDestination: this.#onDestination.bind(this),
-      onEventType: this.#onEventType.bind(this),
+      onDelete: this.#onDeleteClick.bind(this),
     }
     );
   }
@@ -129,26 +128,12 @@ export default class PointPresenter {
       UpdateType.PATCH,
       { ...this.#point, isFavorite: !this.#point.isFavorite });
   }
-
-  #onDestination(cityName) {
-    const newDestination = this.pointsModel.destinationsByName[cityName];
-    // this.#editPointView.updateElement({
-    //   destination: newDestination,
-    //   offers: [],
-    // });
-  }
-
-  #onEventType(newType) {
-    const newOffersByType = this.pointsModel.offersByType(newType);
-    this.#editPointView.updateElement({
-      pointType: newType,
-      offers: [],
-      possibleOffers: newOffersByType,
-    });
-  }
-
-  #onDateChange(dateChanges) {
-    this.#editPointView.updateElement(dateChanges);
+  #onDeleteClick() {
+    this.#handleDataChange(
+      UserAction.DELETE_POINT,
+      UpdateType.MINOR,
+      this.#point);
+    console.log('its delete');
   }
 
 }

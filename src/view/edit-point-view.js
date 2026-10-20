@@ -148,8 +148,8 @@ function createEditPointForm({
 export default class EditPointView extends AbstractStatefulView {
   #onRollupClick = null;
   #onSubmit = null;
+  #onDelete = null;
   #submitButton = null;
-  #onDestination = null;
   #calenders = null;
   #pointsSrc = null;
 
@@ -158,13 +158,13 @@ export default class EditPointView extends AbstractStatefulView {
     pointsSrc,
     onCloseEdit,
     onSubmit,
-    onDestination,
+    onDelete,
   }) {
     super();
     this.#pointsSrc = pointsSrc;
     this.#onRollupClick = onCloseEdit;
     this.#onSubmit = onSubmit;
-    this.#onDestination = onDestination;
+    this.#onDelete = onDelete;
     this._setState(EditPointView.parsePointToState(point));
     this._restoreHandlers();
   }
@@ -173,11 +173,11 @@ export default class EditPointView extends AbstractStatefulView {
     this.#submitButton = this.element.querySelector('.event__save-btn');
     this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#onRollUpClickHandler.bind(this));
     this.#submitButton.addEventListener('click', this.#onSubmitHandler.bind(this));
-    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#onDeleteHandler.bind(this));
     this.element.querySelector('.event__available-offers').addEventListener('change', this.#onOffersClick.bind(this));
     this.element.querySelector('.event__input--price').addEventListener('change', this.#onPriceChange.bind(this));
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#onDestinationChange.bind(this));
     this.element.querySelector('.event__type-group').addEventListener('change', this.#onEventTypeClick.bind(this));
+    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#onDeletHandler.bind(this));
     this.#setDatePicker();
   }
 
@@ -223,9 +223,9 @@ export default class EditPointView extends AbstractStatefulView {
     this.#submitButton.disabled = true;
   }
 
-#onDeleteHandler(){
-  console.log('on delete')
-}
+  #onDeletHandler() {
+    this.#onDelete();
+  }
 
   #onOffersClick(evt) {
     this.#updateOffers(evt);

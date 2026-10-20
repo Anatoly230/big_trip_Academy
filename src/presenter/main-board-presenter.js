@@ -115,6 +115,7 @@ export default class BoardPresenter {
   }
 
   #clearBoard() {
+    this.#sortPresenter.delete()
     this.#pointsListPresenter.removePoints();
   }
 
