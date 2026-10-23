@@ -3,6 +3,16 @@ import { getPointDate } from '../utils/common.js';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/themes/material_blue.css';
 
+const BLANK_POINT = {
+  basePrice: 0,
+  dateFrom: new Date(Date.now()).toJSON(),
+  dateTo: new Date(Date.now() + (1000 * 60 * 60 * 7)).toJSON(),
+  destination: '',
+  id: '',
+  isFavorite: false,
+  offers: [],
+  type: 'Taxi',
+};
 
 function createEditPointForm({
   state,
@@ -57,11 +67,11 @@ function createEditPointForm({
   function createCitiesList(cityList) {
     return `
             <div class="event__field-group  event__field-group--destination">
-               <label class="event__label  event__type-output" for="id="${destination.id}">
+               <label class="event__label  event__type-output" for="id="${destination ? destination.id : ''}">
                  ${state.type}
                </label>
-               <input class="event__input  event__input--destination" id="${destination.id}" type="text"
-                 name="event-destination" value="${destination.name}" list="destination-list-1">
+               <input class="event__input  event__input--destination" id="${destination ? destination.id : ''}" type="text"
+                 name="event-destination" value="${destination ? destination.name : ''}" list="destination-list-1">
                <datalist id="destination-list-1">
                  ${cityList.map(getCityOption).join('')}
                </datalist>
@@ -133,10 +143,10 @@ function createEditPointForm({
 
     <section class="event__section  event__section--destination">
       <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-      <p class="event__destination-description">${destination.description}</p>
+      <p class="event__destination-description">${destination ? destination.description : ''}</p>
       <div class="event__photos-container">
         <div class="event__photos-tape">
-          {destination.pictures.map(getDestinationImages).join('')}
+          ${destination ? destination.pictures.map(getDestinationImages).join('') : ''}
         </div>
       </div>
     </section>
@@ -154,7 +164,7 @@ export default class EditPointView extends AbstractStatefulView {
   #pointsSrc = null;
 
   constructor({
-    point,
+    point = BLANK_POINT,
     pointsSrc,
     onCloseEdit,
     onSubmit,
@@ -258,7 +268,7 @@ export default class EditPointView extends AbstractStatefulView {
 
   #onDestinationChange(evt) {
     const newDestId = this.#pointsSrc.destinationsNameBook[evt.target.value]['id'];
-    this.updateElement({ ...this._state, destination: newDestId, offers: [] })
+    this.updateElement({ ...this._state, destination: newDestId, offers: [] });
   }
 
 

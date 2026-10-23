@@ -6,13 +6,20 @@ import BoardPresenter from './presenter/main-board-presenter.js';
 
 const boardContainer = document.querySelector('.trip-events');
 const filterContainer = document.querySelector('.trip-controls__filters');
+const newEventButtonContainer = document.querySelector('.trip-main');
 const pointsModel = new PointsModel();
 const filterModel = new FilterModel();
+
+// temporary
+const oldButton = newEventButtonContainer.querySelector('.trip-main__event-add-btn');
+oldButton.remove();
+// temporary
 
 const mainPresenter = new BoardPresenter({
   boardContainer,
   filterModel,
-  pointsModel
+  pointsModel,
+  newEventButtonContainer,
 });
 
 const filterPresenter = new FilterPresenter({

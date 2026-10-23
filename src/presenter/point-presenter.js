@@ -81,9 +81,9 @@ export default class PointPresenter {
 
   resetView() {
     if (this.#mode !== Mode.DEFAULT) {
-      this.#editPointView.reset(this.#point); // перевод в изначальное положение данных во view возможно только 
-      // тогда когда она находится в дереве html, если её от туда забрать, то parent элемент будет являться null, 
-      // поэтому эта оперция должна стоять раньше метода this.#replaceFormToCard(), так как он выдирает view из дерева html 
+      this.#editPointView.reset(this.#point); // перевод в изначальное положение данных во view возможно только
+      // тогда когда она находится в дереве html, если её от туда забрать, то parent элемент будет являться null,
+      // поэтому эта оперция должна стоять раньше метода this.#replaceFormToCard(), так как он выдирает view из дерева html
       this.#replaceFormToCard();
     }
   }

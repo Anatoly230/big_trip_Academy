@@ -2,9 +2,9 @@ import { getRandomNum, getRandomFromArray, getId } from '../utils/common.js';
 import { cities, cityDescriptions, imageDescriptions } from './destination-info.js';
 
 const PREFIX = 'DEST';
-const DESTCOUNT = cities.length - 1;
+const DESTCOUNT = cities.length;
 const IMAGEPATH = 'https://loremflickr.com/248/152?random=';
-let cityNum = 0;
+
 class DestinationData {
   constructor() {
     this.cities = cities;
@@ -36,15 +36,12 @@ class DestinationData {
     return getRandomNum(1, 5);
   }
 
-  getDestination() {
-    if (cityNum > DESTCOUNT) {
-      cityNum = 0;
-    }
-    cityNum++;
+  getDestination(el, i) {
+
     return {
-      name: this.cities[cityNum],
+      name: this.cities[i],
       id: this.getId(),
-      description: this.descriptions[cityNum],
+      description: this.descriptions[i],
       pictures: this.getCityInfoArray()
     };
   }

@@ -3,6 +3,9 @@ import { allPoints } from '../mock/point-mock.js';
 import { allOffers } from '../mock/offer-mock.js';
 import { cities } from '../mock/destination-info.js';
 import { destinations } from '../mock/destination-mock.js';
+import { getId } from '../utils/common.js';
+
+const PRFIX = 'PNT';
 
 export default class PointsModel extends Observable {
   #allPoints = null;
@@ -16,13 +19,16 @@ export default class PointsModel extends Observable {
   #offersIdBook = null;
   #offersTypeBook = null;
 
-
   updatePoint(updateType, update) {
     this.pointsIdBook[update.id] = update;
     this._notify(updateType, update);
   }
 
   addPoint(updateType, update) {
+    const ID = getId(PRFIX);
+    update.id = ID;
+    this.points.push(update);
+    this.#pointsIdBook[ID] = update;
     this._notify(updateType, update);
 
   }
@@ -112,10 +118,6 @@ export default class PointsModel extends Observable {
     return this.#pointsIdBook;
   }
 
-  updateFavorite(pointId, favoriteState) {
-    const updatedPoint = this.#pointsIdBook[pointId];
-    updatedPoint.point.isFavorite = favoriteState;
-  }
 
   offersByType(pointType) {
     function getOffersByType(el) {

@@ -7,9 +7,14 @@ import SortPresenter from './sort-presenter.js';
 import { FilterType, SortType, UpdateType, UserAction } from '../const.js';
 import { filters } from '../utils/filters.js';
 import { sortPriceUp, sortTimeUp } from '../utils/sorts.js';
+import NewEventButtonView from '../view/new-event-button-view.js';
+import newPointPresenter from './new-point-presenter.js';
+
 
 export default class BoardPresenter {
   #boardContainer = null;
+  #newEventButtonContainer = null;
+  #newEventButtonView = null;
   #listView = new ListView();
   #sortModel = new SortModel();
   #pointsModel = null;
@@ -19,11 +24,13 @@ export default class BoardPresenter {
   #sortType = SortType.DEFAULT;
   #noPointsView = null;
   #pointsListPresenter = null;
+  #newPointPresenter = null;
 
-  constructor({ boardContainer, pointsModel, filterModel }) {
+  constructor({ boardContainer, pointsModel, filterModel, newEventButtonContainer }) {
     this.#boardContainer = boardContainer;
     this.#pointsModel = pointsModel;
     this.#filterModel = filterModel;
+    this.#newEventButtonContainer = newEventButtonContainer;
 
     this.#pointsModel.addObserver(this.#handleModelEvent.bind(this));
     this.#filterModel.addObserver(this.#handleModelEvent.bind(this));
@@ -105,11 +112,28 @@ export default class BoardPresenter {
     this.#pointsListPresenter.init();
   }
 
+  #renderNewEventButton() {
+    this.#newEventButtonView = new NewEventButtonView({ onNewEvent: this.#onNewEventButtonHandler.bind(this) });
+    render(this.#newEventButtonView, this.#newEventButtonContainer);
+  }
+
+  #onNewEventButtonHandler() {
+    this.#newPointPresenter = new newPointPresenter({
+      pointsSrc: this.#pointsModel.srcInfo,
+      pointsContainer: this.#listView,
+      onDataChange: this.#handleViewAction.bind(this),
+    });
+    this.#newPointPresenter.init();
+    console.log('get new event');
+  }
+
   #renderBoard() {
+    this.#renderNewEventButton();
     const points = this.points;
     if (points.length === 0) {
       this.#renderNoPoints();
     }
+
     this.#renderSort();
     this.#renderPoints();
   }
