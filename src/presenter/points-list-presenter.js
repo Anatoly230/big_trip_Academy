@@ -1,5 +1,6 @@
 
 import PointPresenter from './point-presenter.js';
+import newPointPresenter from './new-point-presenter.js';
 
 
 export default class PointsListPresenter {
@@ -9,6 +10,7 @@ export default class PointsListPresenter {
   #editedPoint = null;
   #pointsSrc = null;
   #handleDataChange = null;
+  #newPoint = null;
 
 
   constructor({ listComponent, pointsSrc, points, onDataChange }) {
@@ -16,6 +18,18 @@ export default class PointsListPresenter {
     this.#points = points;
     this.#pointsSrc = pointsSrc;
     this.#handleDataChange = onDataChange;
+  }
+
+  createNewPont() {
+    if (!this.#newPoint) {
+
+      this.#newPoint = new newPointPresenter({
+        pointsSrc: this.#pointsSrc,
+        pointsContainer: this.#listComponent,
+        onDataChange: this.#handleDataChange,
+      });
+    }
+    this.#newPoint.init();
   }
 
   init(points = this.#points) {

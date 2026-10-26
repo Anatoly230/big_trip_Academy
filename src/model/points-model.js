@@ -28,7 +28,8 @@ export default class PointsModel extends Observable {
     const ID = getId(PRFIX);
     update.id = ID;
     this.points.push(update);
-    this.#pointsIdBook[ID] = update;
+    console.log(this.pointsIdBook);
+    this.pointsIdBook[ID] = update;
     this._notify(updateType, update);
 
   }

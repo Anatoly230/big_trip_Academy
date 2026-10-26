@@ -1,5 +1,7 @@
-import { render } from '../framework/render.js';
+import { UpdateType, UserAction } from '../const.js';
+import { render, remove } from '../framework/render.js';
 import EditPointView from '../view/edit-point-view.js';
+
 
 export default class newPointPresenter {
   #pointsContainer = null;
@@ -24,14 +26,21 @@ export default class newPointPresenter {
 
   init() {
     this.#createPoint();
-    render(this.#editPointView, this.#pointsContainer.element,'afterBegin');
+    render(this.#editPointView, this.#pointsContainer.element, 'afterBegin');
   }
 
-  #saveEditPoint() { }
-
+  #saveEditPoint(update) {
+    this.#handleDataChange(
+      UserAction.ADD_POINT,
+      UpdateType.MINOR,
+      update);
+    this.#closeEditForm()
+  }
+  #closeEditForm() {
+    remove(this.#editPointView);
+  }
   #onDeleteClick() {
-
+    this.#closeEditForm()
   }
-
 
 };

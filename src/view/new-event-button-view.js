@@ -17,7 +17,7 @@ export default class NewEventButtonView extends AbstractView {
     this.element.disabled = true;
   }
 
-  #enable() {
+  enable() {
     this.element.disabled = false;
   }
 

@@ -8,7 +8,6 @@ import { FilterType, SortType, UpdateType, UserAction } from '../const.js';
 import { filters } from '../utils/filters.js';
 import { sortPriceUp, sortTimeUp } from '../utils/sorts.js';
 import NewEventButtonView from '../view/new-event-button-view.js';
-import newPointPresenter from './new-point-presenter.js';
 
 
 export default class BoardPresenter {
@@ -24,7 +23,6 @@ export default class BoardPresenter {
   #sortType = SortType.DEFAULT;
   #noPointsView = null;
   #pointsListPresenter = null;
-  #newPointPresenter = null;
 
   constructor({ boardContainer, pointsModel, filterModel, newEventButtonContainer }) {
     this.#boardContainer = boardContainer;
@@ -113,24 +111,25 @@ export default class BoardPresenter {
   }
 
   #renderNewEventButton() {
-    this.#newEventButtonView = new NewEventButtonView({ onNewEvent: this.#onNewEventButtonHandler.bind(this) });
-    render(this.#newEventButtonView, this.#newEventButtonContainer);
+    if (this.#newEventButtonView) {
+      this.#newEventButtonView.enable();
+    } else {
+      this.#newEventButtonView = new NewEventButtonView({
+        onNewEvent: this.#onNewEventButtonHandler.bind(this)
+      });
+      render(this.#newEventButtonView, this.#newEventButtonContainer);
+    }
   }
 
   #onNewEventButtonHandler() {
-    this.#newPointPresenter = new newPointPresenter({
-      pointsSrc: this.#pointsModel.srcInfo,
-      pointsContainer: this.#listView,
-      onDataChange: this.#handleViewAction.bind(this),
-    });
-    this.#newPointPresenter.init();
-    console.log('get new event');
+    this
+      .#pointsListPresenter
+      .createNewPont();
   }
 
   #renderBoard() {
     this.#renderNewEventButton();
-    const points = this.points;
-    if (points.length === 0) {
+    if (this.points.length === 0) {
       this.#renderNoPoints();
     }
 
@@ -139,7 +138,7 @@ export default class BoardPresenter {
   }
 
   #clearBoard() {
-    this.#sortPresenter.delete()
+    this.#sortPresenter.delete();
     this.#pointsListPresenter.removePoints();
   }
 
