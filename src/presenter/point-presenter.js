@@ -1,12 +1,7 @@
-import { UpdateType, UserAction } from '../const.js';
+import { Mode, UpdateType, UserAction } from '../const.js';
 import { remove, render, replace } from '../framework/render.js';
 import EditPointView from '../view/edit-point-view.js';
 import PointView from '../view/point-view.js';
-
-const Mode = {
-  DEFAULT: 'DEFAULT',
-  EDITING: 'EDITING',
-};
 
 export default class PointPresenter {
   #pointsContaner = null;
@@ -89,20 +84,22 @@ export default class PointPresenter {
   }
 
   #replaceCardToForm() {
-    this.#handleModeChange(this.#point.id);
     replace(this.#editPointView, this.#pointView);
     document.addEventListener('keydown', this.#escKeyDownHandler);
     this.#mode = Mode.EDITING;
+    this.#handleModeChange({ id: this.#point.id, mode: this.#mode });
   }
 
   #replaceFormToCard() {
     replace(this.#pointView, this.#editPointView);
     document.removeEventListener('keydown', this.#escKeyDownHandler);
     this.#mode = Mode.DEFAULT;
+    this.#handleModeChange({ id: this.#point.id, mode: this.#mode });
   }
 
   #escKeyDownHandler = (evt) => {
     if (evt.key === 'Escape') {
+      this.#handleModeChange({ id: this.#point.id, mode: this.#mode });
       evt.preventDefault();
       this.resetView();
     }
@@ -128,6 +125,7 @@ export default class PointPresenter {
       UpdateType.PATCH,
       { ...this.#point, isFavorite: !this.#point.isFavorite });
   }
+
   #onDeleteClick() {
     this.#handleDataChange(
       UserAction.DELETE_POINT,

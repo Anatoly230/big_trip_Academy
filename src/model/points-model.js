@@ -20,7 +20,7 @@ export default class PointsModel extends Observable {
   #offersTypeBook = null;
 
   updatePoint(updateType, update) {
-    this.pointsIdBook[update.id] = update;
+    this.pointsIdBook.set(update.id, update);
     this._notify(updateType, update);
   }
 
@@ -28,15 +28,14 @@ export default class PointsModel extends Observable {
     const ID = getId(PRFIX);
     update.id = ID;
     this.points.push(update);
-    console.log(this.pointsIdBook);
-    this.pointsIdBook[ID] = update;
+    this.pointsIdBook.set(ID, update);
     this._notify(updateType, update);
 
   }
 
   deletePoint(updateType, update) {
     this.#allPoints = this.#allPoints.filter((point) => point.id !== update.id);
-    this.#pointsIdBook = null;
+    this.pointsIdBook.delete(update.id);
     this._notify(updateType, update);
   }
 
@@ -114,7 +113,10 @@ export default class PointsModel extends Observable {
 
   get pointsIdBook() {
     if (!this.#pointsIdBook) {
-      this.#pointsIdBook = this.points.reduce(this.#setByProp('id'), {});
+      this.#pointsIdBook = new Map();
+      this.points.forEach((p) => {
+        this.#pointsIdBook.set(p.id, p);
+      });
     }
     return this.#pointsIdBook;
   }

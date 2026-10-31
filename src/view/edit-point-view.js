@@ -71,7 +71,7 @@ function createEditPointForm({
                  ${state.type}
                </label>
                <input class="event__input  event__input--destination" id="${destination ? destination.id : ''}" type="text"
-                 name="event-destination" value="${destination ? destination.name : ''}" list="destination-list-1">
+                 name="event-destination" value="${destination ? destination.name : ''}" list="destination-list-1" placeholder="необходимо выбрать город">
                <datalist id="destination-list-1">
                  ${cityList.map(getCityOption).join('')}
                </datalist>
@@ -127,7 +127,7 @@ function createEditPointForm({
                  value="${getTotalCost(state.basePrice)} ">
              </div >
 
-             <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
+             <button class="event__save-btn  btn  btn--blue" type="submit" title="${!state.destination ? 'если не выбрать город, не возможно сохранить точку' : ''}" ${!state.destination ? 'disabled' : ''}>Save</button>
              <button class="event__reset-btn" type="reset">Delete</button>
              <button class="event__rollup-btn" type="button">
                <span class="visually-hidden">Open event</span>

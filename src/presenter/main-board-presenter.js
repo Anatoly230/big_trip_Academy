@@ -1,4 +1,4 @@
-import { render } from '../framework/render.js';
+import { remove, render } from '../framework/render.js';
 import EmptyListView from '../view/empty-list-veiw.js';
 import ListView from '../view/list-view.js';
 import PointsListPresenter from './points-list-presenter.js';
@@ -74,7 +74,6 @@ export default class BoardPresenter {
     this.#filterType = this.#filterModel.filter;
     const points = this.#pointsModel.points;
     const filtredPoints = filters[this.#filterType](points);
-
     switch (this.#sortType) {
       case SortType.PRICE:
         return filtredPoints.sort(sortPriceUp);
@@ -99,14 +98,19 @@ export default class BoardPresenter {
     render(this.#noPointsView, this.#listView.element);
   }
 
-  #renderPoints() {
-    render(this.#listView, this.#boardContainer);
+  #createPointsListPresenter() {
     this.#pointsListPresenter = new PointsListPresenter({
       listComponent: this.#listView,
-      points: this.#pointsModel.points,
+      points: this.points,
       pointsSrc: this.#pointsModel.srcInfo,
       onDataChange: this.#handleViewAction.bind(this),
+      onCloseNewPointForm: this.#activateNewEventButton.bind(this),
     });
+  }
+
+  #renderPoints() {
+    render(this.#listView, this.#boardContainer);
+    this.#createPointsListPresenter();
     this.#pointsListPresenter.init();
   }
 
@@ -122,17 +126,23 @@ export default class BoardPresenter {
   }
 
   #onNewEventButtonHandler() {
-    this
-      .#pointsListPresenter
-      .createNewPont();
+    this.#pointsListPresenter.createNewPont();
+  }
+
+  #activateNewEventButton() {
+    this.#newEventButtonView.enable();
   }
 
   #renderBoard() {
     this.#renderNewEventButton();
+
+    if (this.#noPointsView) {
+      remove(this.#noPointsView);
+    }
+
     if (this.points.length === 0) {
       this.#renderNoPoints();
     }
-
     this.#renderSort();
     this.#renderPoints();
   }

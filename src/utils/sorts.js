@@ -26,12 +26,16 @@ function getCleanSortValue(sortValue) {
 }
 
 function sortTimeUp(a, b) {
-  return dayjs(b.point.dateTo).diff(b.point.dateFrom, 'm') - dayjs(a.point.dateTo).diff(a.point.dateFrom, 'm');
+  return dayjs(b.dateTo).diff(b.dateFrom, 'm') - dayjs(a.dateTo).diff(a.dateFrom, 'm');
 }
 
 function sortPriceUp(a, b) {
-  return b.point.basePrice - a.point.basePrice;
+  return b.basePrice - a.basePrice;
 }
+
+// function sortDayUp(a, b) {
+//   return b.basePrice - a.basePrice;
+// }
 
 
 export { getSorts, getCleanSortValue, sortTimeUp, sortPriceUp };

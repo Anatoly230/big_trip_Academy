@@ -1,6 +1,7 @@
 
 import PointPresenter from './point-presenter.js';
 import newPointPresenter from './new-point-presenter.js';
+import { Mode } from '../const.js';
 
 
 export default class PointsListPresenter {
@@ -8,28 +9,35 @@ export default class PointsListPresenter {
   #points = null;
   #allPointPresenters = new Map();
   #editedPoint = null;
+  #editedNewPoint = false;
   #pointsSrc = null;
   #handleDataChange = null;
   #newPoint = null;
+  #onCloseNewPointForm = null;
 
 
-  constructor({ listComponent, pointsSrc, points, onDataChange }) {
+  constructor({ listComponent, pointsSrc, points, onDataChange, onCloseNewPointForm }) {
     this.#listComponent = listComponent;
     this.#points = points;
     this.#pointsSrc = pointsSrc;
     this.#handleDataChange = onDataChange;
+    this.#onCloseNewPointForm = onCloseNewPointForm;
   }
 
   createNewPont() {
+    if (this.#editedPoint) {
+      this.getPointPresenter(this.#editedPoint).resetView();
+    }
     if (!this.#newPoint) {
-
       this.#newPoint = new newPointPresenter({
         pointsSrc: this.#pointsSrc,
         pointsContainer: this.#listComponent,
         onDataChange: this.#handleDataChange,
+        onCloseNewPointForm: this.#onCloseNewPointFormHandle.bind(this),
       });
     }
     this.#newPoint.init();
+    this.#editedNewPoint = true;
   }
 
   init(points = this.#points) {
@@ -44,6 +52,11 @@ export default class PointsListPresenter {
       pointPresenter.init(point);
       this.#allPointPresenters.set(point.id, pointPresenter);
     }
+  }
+
+  #onCloseNewPointFormHandle() {
+    this.#onCloseNewPointForm();
+    // this.#editedNewPoint = false;
   }
 
   getPointPresenter(id) {
@@ -76,13 +89,21 @@ export default class PointsListPresenter {
   //   this.init(sortedPoints);
   // }
 
-  #handleModeChange(id) {
-    if (!this.#editedPoint) {
+  #handleModeChange({ id, mode }) {
+    if (mode === Mode.EDITING && !this.#editedPoint) {
       this.#editedPoint = id;
     }
-    if (this.#editedPoint !== id) {
+
+    if (mode === Mode.EDITING && this.#editedPoint !== id) {
       this.getPointPresenter(this.#editedPoint).resetView();
       this.#editedPoint = id;
+    }
+
+    if (mode === Mode.DEFAULT) {
+      this.#editedPoint = null;
+    }
+    if (this.#editedNewPoint) {
+      this.#newPoint.closeEditForm();
     }
   }
 

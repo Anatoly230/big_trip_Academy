@@ -31,4 +31,9 @@ const UpdateType = {
   MAJOR: 'MAJOR',
 };
 
-export { EMPTY_MASSAGE, FilterType, SortType, UpdateType, UserAction };
+const Mode = {
+  DEFAULT: 'DEFAULT',
+  EDITING: 'EDITING',
+};
+
+export { EMPTY_MASSAGE, FilterType, SortType, UpdateType, UserAction, Mode };
