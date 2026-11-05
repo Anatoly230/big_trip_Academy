@@ -21,6 +21,14 @@ export default class PointsModel extends Observable {
 
   updatePoint(updateType, update) {
     this.pointsIdBook.set(update.id, update);
+
+    this.#allPoints = this.points.map((point) => {
+      if (point.id === update.id) {
+        return update;
+      }
+      return point;
+    })
+
     this._notify(updateType, update);
   }
 
@@ -74,7 +82,7 @@ export default class PointsModel extends Observable {
   get offersIdBook() {
     if (!this.#offersIdBook) {
       const heap = [];
-      for (const offer of this.#offers) {
+      for (const offer of this.offers) {
         heap.push(...offer.offers);
       }
       this.#offersIdBook = heap.reduce(this.#setByProp('id'), {});

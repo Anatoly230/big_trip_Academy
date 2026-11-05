@@ -14,13 +14,12 @@ function getFilters(filter) {
 const filters = {
   [FilterType.EVERETHING]: (points) => points.filter((point) => point),
   [FilterType.FUTURE]: (points) => points.filter((point) => dayjs(point.dateFrom).diff(dayjs(), 'd') > 0),
-  [FilterType.PRESENT]: (points) => {
+  [FilterType.PRESENT]: (points) =>
     points.filter((point) => {
       const startTime = dayjs(point.dateFrom).diff(dayjs(), 'd');
       const endTime = dayjs(point.dateTo).diff(dayjs(), 'd');
       return startTime <= 0 && endTime >= 0;
-    })
-  },
+    }),
   [FilterType.PAST]: (points) => points.filter((point) => dayjs(point.dateTo).diff(dayjs(), 'd') < 0),
 };
 

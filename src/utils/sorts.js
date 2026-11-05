@@ -28,14 +28,14 @@ function getCleanSortValue(sortValue) {
 function sortTimeUp(a, b) {
   return dayjs(b.dateTo).diff(b.dateFrom, 'm') - dayjs(a.dateTo).diff(a.dateFrom, 'm');
 }
+function getTotalOffersPrice(total, id) { total += this[id].price; return total };
 
 function sortPriceUp(a, b) {
-  return b.basePrice - a.basePrice;
+  const totalA = a.offers.reduce(getTotalOffersPrice.bind(this), 0)
+  const totalB = b.offers.reduce(getTotalOffersPrice.bind(this), 0)
+  return (b.basePrice + totalB) - (a.basePrice + totalA);
 }
 
-// function sortDayUp(a, b) {
-//   return b.basePrice - a.basePrice;
-// }
 
 
 export { getSorts, getCleanSortValue, sortTimeUp, sortPriceUp };

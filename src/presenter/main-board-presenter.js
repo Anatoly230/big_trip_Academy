@@ -32,6 +32,7 @@ export default class BoardPresenter {
 
     this.#pointsModel.addObserver(this.#handleModelEvent.bind(this));
     this.#filterModel.addObserver(this.#handleModelEvent.bind(this));
+    this.#sortModel.addObserver(this.#handleModelEvent.bind(this));
   }
 
   #handleViewAction(actionType, apdateType, update) {
@@ -71,13 +72,15 @@ export default class BoardPresenter {
 
   //выдаёт уже отфильтрованные и отсортированные точки
   get points() {
+    
     this.#filterType = this.#filterModel.filter;
+    this.#sortType = this.#sortModel.sortType;
     const points = this.#pointsModel.points;
     const filtredPoints = filters[this.#filterType](points);
     switch (this.#sortType) {
       case SortType.PRICE:
-        return filtredPoints.sort(sortPriceUp);
-      case SortType.TIME:
+        return filtredPoints.sort(sortPriceUp.bind(this.#pointsModel.offersIdBook));
+        case SortType.TIME:
         return filtredPoints.sort(sortTimeUp);
     }
     return filtredPoints;

@@ -1,4 +1,5 @@
-import { render } from '../framework/render.js';
+import { UpdateType } from '../const.js';
+import { remove, render } from '../framework/render.js';
 import { getSorts } from '../utils/sorts.js';
 import SortView from '../view/sort-view.js';
 
@@ -21,13 +22,13 @@ export default class SortPresenter {
   }
 
   #onSortChange(sortType) {
-    this.#sortModel.sortType = { sortType };
+    this.#sortModel.sortType = { updateType: UpdateType.MAJOR, sortType };
   }
 
   #handleSortModelEvent() {
     this.#sortView.updateElement({ sorts: getSorts(this.#sortModel.sortType) });
   }
   delete() {
-    this.#sortView.element.remove();
+    remove(this.#sortView); 
   }
 }
