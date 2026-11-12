@@ -123,7 +123,7 @@ function createEditPointForm({
                  <span class="visually-hidden">Price</span>
                  €
                </label>
-               <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" disabled
+               <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price"
                  value="${getTotalCost(state.basePrice)} ">
              </div >
 
@@ -249,8 +249,7 @@ export default class EditPointView extends AbstractStatefulView {
     } else {
       this._state.offers.push(offerId);
     }
-    this.updateElement(this._state)
-    // console.log('on ofers change', this._state)
+    this.updateElement(this._state);
   }
 
   #onEventTypeClick(evt) {
@@ -259,7 +258,12 @@ export default class EditPointView extends AbstractStatefulView {
 
 
   #updatePrice(evt) {
-    this._state = { ...this._state, basePrice: evt.target.value };
+    if (+evt.target.value !== +evt.target.value) {
+      console.log('Nan')
+      this.updateElement({ ...this._state });
+      return;
+    }
+    this.updateElement({ ...this._state, basePrice: +evt.target.value });
   }
 
   #onPriceChange(evt) {
@@ -267,8 +271,11 @@ export default class EditPointView extends AbstractStatefulView {
   }
 
   #onDestinationChange(evt) {
-    const newDestId = this.#pointsSrc.destinationsNameBook[evt.target.value]['id'];
-    this.updateElement({ ...this._state, destination: newDestId, offers: [] });
+    if (this.#pointsSrc.destinationsNameBook[evt.target.value]) {
+      const newDestId = this.#pointsSrc.destinationsNameBook[evt.target.value]['id'];
+      this.updateElement({ ...this._state, destination: newDestId, offers: [] });
+    }
+    this.updateElement({ ...this._state });
   }
 
 

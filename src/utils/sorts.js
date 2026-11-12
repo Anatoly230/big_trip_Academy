@@ -25,17 +25,21 @@ function getCleanSortValue(sortValue) {
   return /^\w+?-(\w+)/gm.exec(sortValue)[1];
 }
 
-function sortTimeUp(a, b) {
-  return dayjs(b.dateTo).diff(b.dateFrom, 'm') - dayjs(a.dateTo).diff(a.dateFrom, 'm');
+function getTotalOffersPrice(total, id) {
+  total += this[id].price;
+  return total;
+};
+
+
+
+export const sort = {
+  [SortType.DEFAULT]: (a, b) => dayjs(a.dateFrom) - dayjs(b.dateTo),
+  [SortType.TIME]: (a, b) => dayjs(b.dateTo).diff(b.dateFrom, 'm') - dayjs(a.dateTo).diff(a.dateFrom, 'm'),
+  [SortType.PRICE]: function (a, b) {
+    const totalA = a.offers.reduce(getTotalOffersPrice.bind(this), 0)
+    const totalB = b.offers.reduce(getTotalOffersPrice.bind(this), 0)
+    return (b.basePrice + totalB) - (a.basePrice + totalA);
+  },
+
 }
-function getTotalOffersPrice(total, id) { total += this[id].price; return total };
-
-function sortPriceUp(a, b) {
-  const totalA = a.offers.reduce(getTotalOffersPrice.bind(this), 0)
-  const totalB = b.offers.reduce(getTotalOffersPrice.bind(this), 0)
-  return (b.basePrice + totalB) - (a.basePrice + totalA);
-}
-
-
-
-export { getSorts, getCleanSortValue, sortTimeUp, sortPriceUp };
+export { getSorts, getCleanSortValue};

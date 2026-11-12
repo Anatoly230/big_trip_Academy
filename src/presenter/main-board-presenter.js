@@ -6,16 +6,18 @@ import SortModel from '../model/sort-model.js';
 import SortPresenter from './sort-presenter.js';
 import { FilterType, SortType, UpdateType, UserAction } from '../const.js';
 import { filters } from '../utils/filters.js';
-import { sortPriceUp, sortTimeUp } from '../utils/sorts.js';
+import { sort } from '../utils/sorts.js';
 import NewEventButtonView from '../view/new-event-button-view.js';
+import TripInfoPresenter from './trip-infoPresenter.js';
 
 
 export default class BoardPresenter {
   #boardContainer = null;
-  #newEventButtonContainer = null;
+  #headContainer = null;
   #newEventButtonView = null;
   #listView = new ListView();
   #sortModel = new SortModel();
+  #tripInfoPresenter = null;
   #pointsModel = null;
   #filterModel = null;
   #sortPresenter = null;
@@ -24,11 +26,17 @@ export default class BoardPresenter {
   #noPointsView = null;
   #pointsListPresenter = null;
 
-  constructor({ boardContainer, pointsModel, filterModel, newEventButtonContainer }) {
+  constructor({ boardContainer, pointsModel, filterModel, headContainer }) {
     this.#boardContainer = boardContainer;
     this.#pointsModel = pointsModel;
     this.#filterModel = filterModel;
-    this.#newEventButtonContainer = newEventButtonContainer;
+    this.#headContainer = headContainer;
+    this.#tripInfoPresenter = new TripInfoPresenter({
+      tripInfoContainer: this.#headContainer,
+      points: this.points,
+      destinationsIdBook: this.#pointsModel.destinationsIdBook,
+      offersIdBook: this.#pointsModel.offersIdBook,
+    })
 
     this.#pointsModel.addObserver(this.#handleModelEvent.bind(this));
     this.#filterModel.addObserver(this.#handleModelEvent.bind(this));
@@ -50,6 +58,7 @@ export default class BoardPresenter {
         this.#pointsModel.deletePoint(apdateType, update);
         break;
     }
+    this.#tripInfoPresenter.refresh(this.points);
   }
 
   #handleModelEvent(updateType, data) {
@@ -57,6 +66,7 @@ export default class BoardPresenter {
       case UpdateType.PATCH:
         console.log('PATCH Update');
         this.#pointsListPresenter.getPointPresenter(data.id).init(data);
+        // this.#tripInfoReset();
         break;
       case UpdateType.MINOR:
         console.log('Minor Update');
@@ -72,17 +82,21 @@ export default class BoardPresenter {
 
   //выдаёт уже отфильтрованные и отсортированные точки
   get points() {
-    
+
     this.#filterType = this.#filterModel.filter;
     this.#sortType = this.#sortModel.sortType;
     const points = this.#pointsModel.points;
     const filtredPoints = filters[this.#filterType](points);
-    switch (this.#sortType) {
-      case SortType.PRICE:
-        return filtredPoints.sort(sortPriceUp.bind(this.#pointsModel.offersIdBook));
-        case SortType.TIME:
-        return filtredPoints.sort(sortTimeUp);
-    }
+    filtredPoints.sort(sort[this.#sortType].bind(this.#pointsModel.offersIdBook));
+    // switch (this.#sortType) {
+    //   case SortType.PRICE:
+    //     return filtredPoints.sort(sortPriceUp.bind(this.#pointsModel.offersIdBook));
+    //   case SortType.TIME:
+    //     return filtredPoints.sort(sortTimeUp);
+    //   case SortType.DEFAULT:
+    //     return filtredPoints.sort(sortByDay);
+    // }
+
     return filtredPoints;
   }
 
@@ -111,6 +125,26 @@ export default class BoardPresenter {
     });
   }
 
+  // #renderTripInfo() {
+  //   if (!this.#tripInfoPresenter) {
+  //     this.#tripInfoPresenter = new TripInfoPresenter({
+  //       tripInfoContainer: this.#headContainer
+  //     });
+  //     this.#tripInfoPresenter.init(this.#pointsModel.tripInfo());
+  //   }
+  // }
+
+  // #tripInfoDestroy() {
+  //   this.#tripInfoPresenter.destroy();
+  //   this.#tripInfoPresenter = null;;
+  // }
+
+  // #tripInfoReset() {
+  //   this.#tripInfoDestroy();
+  //   this.#renderTripInfo();
+  // }
+
+
   #renderPoints() {
     render(this.#listView, this.#boardContainer);
     this.#createPointsListPresenter();
@@ -124,7 +158,7 @@ export default class BoardPresenter {
       this.#newEventButtonView = new NewEventButtonView({
         onNewEvent: this.#onNewEventButtonHandler.bind(this)
       });
-      render(this.#newEventButtonView, this.#newEventButtonContainer);
+      render(this.#newEventButtonView, this.#headContainer);
     }
   }
 
@@ -146,11 +180,14 @@ export default class BoardPresenter {
     if (this.points.length === 0) {
       this.#renderNoPoints();
     }
+
+    this.#tripInfoPresenter.init();
     this.#renderSort();
     this.#renderPoints();
   }
 
   #clearBoard() {
+    // this.#tripInfoDestroy();
     this.#sortPresenter.delete();
     this.#pointsListPresenter.removePoints();
   }

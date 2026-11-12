@@ -22,7 +22,7 @@ export default class SortPresenter {
   }
 
   #onSortChange(sortType) {
-    this.#sortModel.sortType = { updateType: UpdateType.MAJOR, sortType };
+    this.#sortModel.sortType = { updateType: UpdateType.MINOR, sortType };
   }
 
   #handleSortModelEvent() {

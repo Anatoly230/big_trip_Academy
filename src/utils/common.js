@@ -57,6 +57,7 @@ function getPointDate(date) {
   function getFullDate() {
     return getHumanazeDueDate(date, 'DD/MM/YY HH:mm');
   }
+  
   return function getDate(k) {
     if (k === 'sd') { /*ключ start date месяц и число*/
       return getDepartureDate();

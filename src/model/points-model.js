@@ -52,6 +52,7 @@ export default class PointsModel extends Observable {
     if (!this.#allPoints) {
       this.#allPoints = allPoints;
     }
+
     return this.#allPoints;
   }
 
@@ -146,6 +147,37 @@ export default class PointsModel extends Observable {
       destinationsNameBook: this.destinationsNameBook,
       destinationsIdBook: this.destinationsIdBook,
     };
+  }
+
+  tripInfo() {
+    console.log('trip info works')
+    const middlePointIndex = Math.floor((this.points.length - 1) / 2);
+    const endPointIndex = this.points.length - 1;
+
+    return this.points.reduce((data, p, i) => {
+      if (i === 0) {
+        data.totalCost = 0;
+        data.startDate = p.dateFrom;
+        data.cities = [];
+        data.cities.push(this.destinationsIdBook[p.destination].name);
+      }
+
+      if (i === middlePointIndex) {
+        data.cities.push(this.destinationsIdBook[p.destination].name);
+      }
+
+      if (i === endPointIndex) {
+        data.endDate = p.dateTo;
+        data.cities.push(this.destinationsIdBook[p.destination].name);
+      }
+
+      data.totalCost += p.basePrice + p.offers.reduce((total, id) => {
+        total += this.offersIdBook[id].price;
+        return total;
+      }, 0);
+
+      return data;
+    }, {})
   }
 
   #setByProp(prop) {
